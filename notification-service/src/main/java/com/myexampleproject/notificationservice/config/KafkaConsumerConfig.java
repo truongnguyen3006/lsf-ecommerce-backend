@@ -1,7 +1,6 @@
 package com.myexampleproject.notificationservice.config;
 
 import com.myexampleproject.common.event.OrderPlacedEvent;
-import com.myexampleproject.common.event.PaymentProcessedEvent;
 import com.myorg.lsf.contracts.core.envelope.EventEnvelope;
 import com.myorg.lsf.kafka.SerdeFactory;
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
@@ -33,7 +32,6 @@ public class KafkaConsumerConfig {
         Map<String, Object> props = new HashMap<>(springKafkaProperties.buildConsumerProperties(null));
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaJsonSchemaDeserializer.class);
-        props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
         props.put("use.latest.version", true);
         props.put("oneof.for.nullables", false);
         props.put("json.ignore.unknown", true);
@@ -56,25 +54,7 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, OrderPlacedEvent> orderPlacedKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, OrderPlacedEvent> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(orderPlacedConsumerFactory());
-        return factory;
-    }
-
-    @Bean
-    public ConsumerFactory<String, PaymentProcessedEvent> paymentProcessedConsumerFactory() {
-        Map<String, Object> props = schemaAwareProps();
-        props.put("json.value.type", PaymentProcessedEvent.class.getName());
-        return new DefaultKafkaConsumerFactory<>(props);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, PaymentProcessedEvent> paymentProcessedKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, PaymentProcessedEvent> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(paymentProcessedConsumerFactory());
-        return factory;
+        return singleRecordListenerContainerFactory(orderPlacedConsumerFactory());
     }
 
     @Bean
@@ -84,28 +64,11 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> orderFailedRawKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(orderFailedRawConsumerFactory());
-        return factory;
-    }
-
-    @Bean
-    public ConsumerFactory<String, String> paymentFailedRawConsumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(rawStringProps());
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> paymentFailedRawKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(paymentFailedRawConsumerFactory());
-        return factory;
+        return singleRecordListenerContainerFactory(orderFailedRawConsumerFactory());
     }
 
     /**
-     * Generic container factory used by lsf-eventing-starter only.
-     * Legacy listeners stay on their own typed factories to avoid payload/DLQ regressions.
+     * Generic container factory used by lsf-eventing-starter.
      */
     @Bean(name = "kafkaListenerContainerFactory")
     public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
@@ -139,6 +102,15 @@ public class KafkaConsumerConfig {
                         : ContainerProperties.AckMode.RECORD
         );
         factory.setCommonErrorHandler(commonErrorHandler);
+        return factory;
+    }
+
+    private <T> ConcurrentKafkaListenerContainerFactory<String, T> singleRecordListenerContainerFactory(
+            ConsumerFactory<String, T> consumerFactory
+    ) {
+        ConcurrentKafkaListenerContainerFactory<String, T> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
         return factory;
     }
 }

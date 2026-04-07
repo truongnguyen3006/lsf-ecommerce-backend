@@ -12,9 +12,6 @@
     <artifactId>payment-service</artifactId>
 
     <properties>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <confluent.version>7.6.1</confluent.version>
     </properties>
 
@@ -71,6 +68,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -103,14 +104,22 @@
 
         <dependency>
             <groupId>com.myorg.lsf</groupId>
+            <artifactId>lsf-contracts</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.myorg.lsf</groupId>
             <artifactId>lsf-kafka-starter</artifactId>
-            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.myorg.lsf</groupId>
+            <artifactId>lsf-eventing-starter</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.myorg.lsf</groupId>
             <artifactId>lsf-observability-starter</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
@@ -119,28 +128,21 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-plain-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>plain</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+
 </project>

@@ -12,9 +12,6 @@
     <artifactId>cart-service</artifactId>
 
     <properties>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <confluent.version>7.6.1</confluent.version>
     </properties>
 
@@ -110,20 +107,4 @@
             <url>https://packages.confluent.io/maven/</url>
         </repository>
     </repositories>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
 </project>

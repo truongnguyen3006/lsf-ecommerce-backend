@@ -12,9 +12,6 @@
     <artifactId>order-service</artifactId>
 
     <properties>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <confluent.version>7.6.1</confluent.version>
     </properties>
 
@@ -65,6 +62,40 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams-test-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mysql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.myexampleproject</groupId>
+            <artifactId>payment-service</artifactId>
+            <version>${project.version}</version>
+            <classifier>plain</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.myexampleproject</groupId>
+            <artifactId>notification-service</artifactId>
+            <version>${project.version}</version>
+            <classifier>plain</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -132,65 +163,28 @@
         <dependency>
             <groupId>com.myorg.lsf</groupId>
             <artifactId>lsf-contracts</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.myorg.lsf</groupId>
             <artifactId>lsf-kafka-starter</artifactId>
-            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.myorg.lsf</groupId>
+            <artifactId>lsf-eventing-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>com.myorg.lsf</groupId>
             <artifactId>lsf-outbox-mysql-starter</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.myorg.lsf</groupId>
             <artifactId>lsf-outbox-admin-starter</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.myorg.lsf</groupId>
             <artifactId>lsf-observability-starter</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.myexampleproject</groupId>
-            <artifactId>inventory-service</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

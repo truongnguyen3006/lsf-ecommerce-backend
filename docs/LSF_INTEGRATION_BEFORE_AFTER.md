@@ -1,297 +1,276 @@
-# LSF Integration Before vs After (cập nhật đến Outbox Phase 5.2)
+# LSF Adoption Snapshot for ecommerce-backend
 
-Tài liệu này mô tả ngắn gọn trạng thái **trước khi tích hợp framework LSF**, **sau khi tích hợp Kafka/Quota/Contracts**, **sau khi mở rộng thêm Outbox**, và **sau khi hoàn tất Phase 5.2** vào dự án ecommerce.
+Ngày cập nhật: 2026-04-07
 
----
+## Mục tiêu
 
-## 1. Tổng quan
+Tài liệu này thay cho cách mô tả theo "phase cũ" và phản ánh trạng thái hiện tại của consumer repo `D:\IdeaProjects\ecommerce-backend` sau khi framework repo `D:\IdeaProjects\Lsf-parent-fixed` đã hoàn tất Phase 1 documentation + adoption contracts.
 
-### Trước khi tích hợp
-Hệ thống ecommerce đã có kiến trúc microservices theo hướng event-driven, gồm các service chính như:
+Nguồn đối chiếu chính từ framework:
+
+- `docs/PLATFORM_ADOPTION.md`
+- `docs/MODULE_MATURITY.md`
+- `docs/GOLDEN_PATHS.md`
+- `docs/COMPATIBILITY.md`
+- `docs/UPGRADING.md`
+
+## Tóm tắt hiện trạng
+
+Consumer hiện đã dùng một phần stable core của LSF cho event-driven flow, quota và MySQL outbox, nhưng adoption vẫn còn ở trạng thái "lai" ở nhiều service:
+
+- đã chuẩn hóa baseline Java 21 và gom `lsf.version` ở root POM
+- đã dùng `lsf-kafka-starter` ở 4 service chính có liên quan đến luồng order/inventory/payment/notification
+- đã dùng `lsf-contracts` cho `EventEnvelope` và quota commands
+- đã dùng `lsf-quota-streams-starter` ở `inventory-service`
+- đã dùng `lsf-outbox-mysql-starter` + `lsf-outbox-admin-starter` ở `order-service`
+- mới chỉ có `notification-service` đi vào `lsf-eventing-starter`
+- chưa có service nào hoàn tất full golden path sync HTTP của framework
+- chưa chuyển sang BOM import `lsf-parent`
+
+## Service nào đang dùng module LSF nào
+
+### Service đang dùng LSF
+
+| Service | Module LSF trong POM | Trạng thái hiện tại |
+| --- | --- | --- |
+| `order-service` | `lsf-contracts`, `lsf-kafka-starter`, `lsf-outbox-mysql-starter`, `lsf-outbox-admin-starter`, `lsf-observability-starter` | Đã migrate contracts + Kafka baseline + MySQL outbox; chưa migrate sang eventing/publisher API; admin tooling đã bật nội bộ |
+| `inventory-service` | `lsf-quota-streams-starter`, `lsf-contracts`, `lsf-kafka-starter`, `lsf-observability-starter` | Đã migrate quota concern; Kafka vẫn là manual listener + Kafka Streams topology custom |
+| `notification-service` | `lsf-kafka-starter`, `lsf-eventing-starter` | Đã có một path eventing thật cho order status, nhưng service vẫn còn listener legacy song song |
+| `payment-service` | `lsf-kafka-starter`, `lsf-observability-starter` | Mới migrate transport/runtime baseline; business handlers vẫn dùng `@KafkaListener` + `KafkaTemplate` trực tiếp |
+
+### Service chưa dùng module LSF
+
+| Service | Trạng thái |
+| --- | --- |
+| `product-service` | Chưa dùng module LSF |
+| `user-service` | Chưa dùng module LSF |
+| `cart-service` | Chưa dùng module LSF |
+| `api-gateway` | Chưa dùng `lsf-gateway-starter` |
+| `discovery-server` | Chưa dùng foundation modules của LSF |
+| `common-events` | Chưa migrate domain events sang shared contracts của LSF |
+| `common-dto` | Chưa migrate sang sync contract surface của LSF |
+
+## Phần nào đã migrate
+
+### 1. Build và dependency baseline
+
+- Java baseline đã align về 21.
+- `lsf.version` đã được gom về root POM.
+- Các dependency LSF đang được quản lý tập trung ở root `dependencyManagement`.
+
+### 2. Shared contracts
+
+Đã migrate một phần:
+
+- `EventEnvelope` đang được dùng trong:
+  - `order-service` cho outbox publish
+  - `order-service` cho joiner đọc status envelope
+  - `inventory-service` cho reservation command listener
+  - `notification-service` cho handler eventing
+- `ConfirmReservationCommand` và `ReleaseReservationCommand` đang được dùng giữa `order-service` và `inventory-service`
+
+Chưa migrate hết:
+
+- phần lớn domain events vẫn nằm ở `common-events`
+- chưa có bằng chứng consumer đang dùng `LsfRetryAware`, `LsfRetryableException`, `LsfNonRetryableException`
+- chưa dùng `LsfErrorResponse`, request context hay trace context làm contract chung ở toàn repo
+
+### 3. Kafka runtime conventions
+
+Đã migrate một phần ở 4 service:
+
 - `order-service`
 - `inventory-service`
+- `notification-service`
 - `payment-service`
 
-Tuy nhiên, nhiều phần quan trọng vẫn là cài đặt riêng:
-- Kafka config thủ công theo từng service
-- inventory hold bằng cách trừ stock trực tiếp
-- payment fail hoàn tác bằng cách cộng lại stock
-- direct send Kafka sau khi update DB
-- chưa có outbox cho status event
-- chưa có chiến lược tách contract topic cũ và topic mới
-
-### Sau Giai đoạn 1
-Dự án ecommerce đã sử dụng framework LSF để thay thế một phần cài đặt thủ công:
-- Kafka integration được chuẩn hóa bằng `lsf-kafka-starter`
-- inventory hold được chuyển sang quota reservation
-- reservation lifecycle được chuẩn hóa bằng `lsf-contracts`
-- order lifecycle được refactor theo mô hình `reserve -> confirm -> release`
-
-### Sau Giai đoạn 2 / Phase 5
-Dự án tiếp tục dùng framework để thay thế một phần direct event publishing:
-- status event của order được ghi vào bảng outbox
-- outbox publisher gửi event ra Kafka
-- status event được bọc trong `EventEnvelope`
-
-### Sau Giai đoạn 2.2 / Phase 5.2
-Dự án tiếp tục hoàn thiện outbox integration bằng cách:
-- tách topic envelope riêng cho status event
-- sửa consumer để unwrap `EventEnvelope`
-- chốt boundary giữa migration của consumer và runtime của starter
-- giải quyết rõ bài toán contract evolution
-
----
-
-## 2. Before vs After theo service
-
-### 2.1 Inventory Service
-
-**Trước**
-- Nhận `InventoryCheckRequest`
-- Đọc stock hiện tại từ Kafka Streams state store
-- Nếu đủ hàng thì trừ stock trực tiếp trong state store
-- Trả `InventoryCheckResult(success=true)`
-
-**Sau Giai đoạn 1**
-- Nhận `InventoryCheckRequest`
-- Đọc stock hiện tại từ state store để lấy `limit` vật lý
-- Gọi `QuotaService.reserve(...)` thông qua `InventoryQuotaService`
-- Không trừ stock trực tiếp ở bước reserve
-- Trả `InventoryCheckResult` dựa trên quota decision
-- Nghe thêm reservation command để:
-  - `confirm`
-  - `release`
-
-**Sau Giai đoạn 2.2**
-- Không thay đổi business ownership
-- Vẫn là nơi sở hữu tài nguyên
-- Vẫn xử lý reservation lifecycle thông qua quota framework
-- Không phải service chính chịu trách nhiệm outbox ở phase này
-
-**Ý nghĩa**
-Inventory Service đã chuyển từ “trừ stock sớm” sang “điều khiển reservation lifecycle bằng quota framework”.
-
-### 2.2 Order Service
-
-**Trước**
-- Nhận order request, phát `order-placed-topic`
-- Khi payment success: đổi trạng thái order
-- Khi payment fail: phát `InventoryAdjustmentEvent(+quantity)` để bù kho
-- SAGA inventory có thể fail sớm khi một item fail
-- Sau khi update DB, status event thường được gửi Kafka trực tiếp
-- Dùng `order-status-topic` như topic status duy nhất
-
-**Sau Giai đoạn 1**
-- Khi payment success:
-  - đổi trạng thái order
-  - phát `ConfirmReservationCommand`
-- Khi payment fail:
-  - đổi trạng thái order
-  - phát `ReleaseReservationCommand`
-- Khi inventory fail:
-  - đổi trạng thái order sang `FAILED`
-  - phát `ReleaseReservationCommand`
-- SAGA inventory được sửa để đợi đủ kết quả của toàn bộ item trước khi chốt trạng thái
-
-**Sau Giai đoạn 2 / Phase 5**
-- Khi đổi status order:
-  - không direct send status event ngay
-  - append `EventEnvelope` vào `lsf_outbox`
-- Outbox publisher sẽ publish status event ra Kafka nền
-
-**Sau Giai đoạn 2.2 / Phase 5.2**
-- Không publish `EventEnvelope` vào `order-status-topic` cũ nữa
-- Dùng topic mới:
-  - `order-status-envelope-topic`
-- Làm rõ rằng `order-status-topic` là contract legacy, còn topic mới là contract framework-based
-- Migration bảng outbox thuộc về consumer project, không phải starter
-
-**Ý nghĩa**
-Order Service đã chuyển qua ba lớp chuẩn hóa:
-1. business/resource lifecycle: `reserve -> confirm -> release`
-2. event lifecycle: `append -> publish -> consume envelope`
-3. contract lifecycle: `legacy topic -> envelope topic`
-
-### 2.3 Payment Service
+Phần đã migrate:
 
-**Trước**
-- Nghe `order-validated-topic`
-- Tự dùng consumer config riêng
-- Phát `payment-processed-topic` hoặc `payment-failed-topic`
+- dependency `lsf-kafka-starter`
+- namespace cấu hình `lsf.kafka.*`
+- baseline retry/DLQ/serializer conventions ở mức framework config
 
-**Sau Giai đoạn 1**
-- Vẫn giữ business responsibility cũ
-- Kafka listener được chuẩn hóa theo hướng dùng `lsf-kafka-starter`
-- Tham gia vào flow mới:
-  - success -> confirm reservation
-  - fail -> release reservation
+Phần chưa migrate hết:
 
-**Sau Giai đoạn 2.2**
-- Không phải service chính tích hợp outbox ở phase này
-- Vẫn tương tác gián tiếp với flow mới thông qua status/order lifecycle đã thay đổi
+- `order-service`, `inventory-service`, `payment-service` vẫn dùng `@KafkaListener` thủ công
+- `payment-service` và `order-service` vẫn dùng `KafkaTemplate` trực tiếp cho business publish
+- `notification-service` vẫn giữ custom `KafkaConsumerConfig` cho các topic legacy
+- `inventory-service` vẫn giữ Kafka Streams topology và serde config riêng
 
-**Ý nghĩa**
-Payment Service không đổi business role, nhưng trở thành mắt xích chuẩn trong reservation lifecycle mới.
+### 4. Eventing
 
-### 2.4 OrderStatusJoiner
+Đã migrate:
 
-**Trước**
-- Đọc `order-status-topic`
-- Deserialize trực tiếp `OrderStatusEvent`
-- Join với `payment-processed-topic`
+- `notification-service` có `@LsfEventHandler` cho `ecommerce.order.status.v1`
 
-**Sau Giai đoạn 2 / Phase 5**
-- Bắt đầu phụ thuộc vào status event được bọc trong outbox
+Chưa migrate:
 
-**Sau Giai đoạn 2.2 / Phase 5.2**
-- Đọc `order-status-envelope-topic`
-- Deserialize `EventEnvelope`
-- Unwrap `payload` thành `OrderStatusEvent`
-- Sau đó join với payment stream
+- `order-service` chưa dùng `lsf-eventing-starter`
+- `inventory-service` chưa dùng `lsf-eventing-starter`
+- `payment-service` chưa dùng `lsf-eventing-starter`
+- `notification-service` mới migrate một path, chưa thay thế toàn bộ legacy listeners
+- chưa có bằng chứng consumer dùng `LsfPublisher`
 
-**Ý nghĩa**
-Joiner trở thành bằng chứng rõ nhất rằng outbox integration đã thay đổi contract kỹ thuật của status event và consumer side đã được điều chỉnh cho phù hợp.
+### 5. Outbox
 
----
+Đã migrate:
 
-## 3. Before vs After theo kỹ thuật hạ tầng
+- `order-service` dùng `OutboxWriter`
+- có migration bảng `lsf_outbox`
+- có publisher polling từ `lsf-outbox-mysql-starter`
+- `order-service` append outbox cho:
+  - order status
+  - reservation confirm
+  - reservation release
 
-### 3.1 Kafka integration
+Chưa migrate hết:
 
-**Trước**
-- Mỗi service tự cấu hình Kafka listener/consumer/producer
-- Dễ sinh chênh lệch config giữa các service
-
-**Sau Giai đoạn 1**
-- Chuẩn hóa bằng `lsf-kafka-starter`
-- Giảm cấu hình thủ công lặp lại
-- Tăng tính tái sử dụng khi áp framework vào project khác
+- không phải mọi publish path của `order-service` đều đi qua outbox
+- `order-placed-topic`, `order-validated-topic`, `order-failed-topic` vẫn còn path direct send
+- chưa có service nào khác ngoài `order-service` dùng outbox
 
-### 3.2 Reservation contract
+### 6. Quota / reservation
 
-**Trước**
-- Không có command chuẩn cho confirm/release reservation
-- compensation gắn chặt với domain event của project
+Đã migrate:
 
-**Sau Giai đoạn 1**
-- Dùng command chuẩn từ `lsf-contracts`:
-  - `ConfirmReservationCommand`
-  - `ReleaseReservationCommand`
+- `inventory-service` dùng `lsf-quota-streams-starter`
+- business adapter `InventoryQuotaService` đã map concern inventory sang quota API
+- `reserve -> confirm -> release` đã trở thành concern framework hóa rõ nhất trong consumer hiện tại
 
-**Ý nghĩa**
-Làm rõ ranh giới giữa orchestration và resource ownership.
+Chưa migrate:
 
-### 3.3 Quota / Resource hold
+- quota chỉ mới hiện diện ở inventory flow
+- chưa có bằng chứng các service khác dùng shared quota query/reservation facade ngoài flow inventory
 
-**Trước**
-- Resource hold được mô phỏng bằng cách trừ stock sớm
-- Khó giải thích như một cơ chế quota framework độc lập
+## Phần nào chưa migrate
 
-**Sau Giai đoạn 1**
-- Resource hold được xử lý bằng quota framework
-- Có các thao tác rõ ràng:
-  - reserve
-  - confirm
-  - release
+### Chưa migrate theo framework golden paths
 
-**Ý nghĩa**
-Tạo nền rõ ràng cho bài toán chống oversell/overbooking.
+- BOM import từ `lsf-parent`
+- full event-driven golden path cho `order-service`
+- full event-driven golden path cho `payment-service`
+- full event-driven golden path cho `inventory-service`
+- observability stack đồng nhất quanh eventing dispatcher
+- sync HTTP stack:
+  - `lsf-service-web-starter`
+  - `lsf-http-client-starter`
+  - `lsf-discovery-starter`
+  - `lsf-resilience-starter`
+  - `lsf-security-starter`
+- gateway path qua `lsf-gateway-starter`
+- config path qua `lsf-config-starter`
+- Kafka admin path qua `lsf-kafka-admin-starter`
+- PostgreSQL outbox path
+- saga/orchestration path qua `lsf-saga-starter`
 
-### 3.4 Event publishing
+### Chưa nên coi là "đã migrate" dù đã có dependency
 
-**Trước**
-- Service cập nhật DB xong gửi Kafka trực tiếp
-- Có rủi ro dual write giữa DB và message broker
+- `lsf-observability-starter` trong `order-service`, `inventory-service`, `payment-service` mới ở mức dependency + config, chưa gắn với một eventing path đồng nhất như framework docs mô tả
+- `notification-service` đã có `lsf-eventing-starter`, nhưng vẫn đang chạy hybrid cùng các listener cũ
 
-**Sau Giai đoạn 2 / Phase 5**
-- Service append event vào outbox trong cùng transaction DB
-- Publisher nền gửi event ra Kafka
-- Event được bọc bằng `EventEnvelope`
+## Phase tiếp theo nên rollout ở đâu
 
-**Sau Giai đoạn 2.2 / Phase 5.2**
-- Event envelope không dùng lại topic cũ
-- Consumer unwrap payload trên topic envelope mới
-- contract cũ và contract mới được tách riêng
-- migration version của outbox được giao cho consumer project
+### Bước chuẩn bị chung
 
-**Ý nghĩa**
-Hệ thống được chuẩn hóa thêm hai lớp rất quan trọng:
-- reliable event publishing
-- contract evolution management
+Nên làm trước ở root repo:
 
----
+1. chuyển từ per-artifact `dependencyManagement` sang BOM import `lsf-parent`
+2. giữ tiếp Java 21, Spring Boot `3.5.7`, Spring Cloud `2025.0.0`
 
-## 4. Kịch bản test trước và sau
+Đây là bước align với framework docs, ít rủi ro hơn mở concern mới.
 
-### Trước
-Có thể test luồng order/inventory/payment thông thường, nhưng khó tách riêng:
-- cơ chế giữ tài nguyên
-- cơ chế publish event tin cậy
-- hành vi contract khi schema thay đổi
+### Service nên ưu tiên trước
 
-### Sau Giai đoạn 1
-Có thể test rõ 3 case:
-1. `reserve thành công -> payment success -> confirm`
-2. `reserve bị reject vì vượt quota`
-3. `reserve thành công -> payment fail -> release -> reserve lại được`
+1. `notification-service`
 
-### Sau Giai đoạn 2 / Phase 5
-Có thể test thêm:
-4. status event được ghi vào outbox và publish nền
+Lý do:
 
-### Sau Giai đoạn 2.2 / Phase 5.2
-Có thể test thêm:
-5. `OrderStatusJoiner` xử lý đúng `EventEnvelope`
-6. topic envelope riêng không phá contract của `order-status-topic` cũ
+- đã có `lsf-eventing-starter`
+- đã có `@LsfEventHandler`
+- blast radius nhỏ hơn `order-service`
+- là nơi dễ chốt ranh giới giữa path mới của LSF và listener legacy
 
----
+Phase tiếp theo hợp lý ở đây là hoàn tất eventing concern cho notification side, rồi mới quyết định có giữ hay loại bỏ listener legacy nào.
 
-## 5. Những phần vẫn còn thuộc boundary của consumer project
+2. `payment-service`
 
-Sau khi tích hợp, vẫn còn một số phần chưa được framework thay thế hoàn toàn:
-- Kafka Streams topology của `inventory-service`
-- business orchestration trong `OrderService`
-- domain model order / inventory / payment
-- `OrderStatusJoiner`
-- migration version cụ thể của consumer project
-- local test support nếu còn giữ lại
-- quyết định topic naming và event evolution strategy
+Lý do:
 
-Điều này không làm giảm giá trị framework; ngược lại, nó làm rõ rằng framework cung cấp khả năng tái sử dụng ở:
-- tầng Kafka integration
-- tầng reservation lifecycle
-- tầng outbox/reliable event publishing
+- service nhỏ hơn `order-service`
+- hiện mới dùng Kafka baseline, chưa có eventing abstraction
+- phù hợp để thử complete golden path A sau `notification-service`
 
----
+3. `order-service`
 
-## 6. Kết luận
+Nên đến sau vì:
 
-Sau khi tích hợp LSF, ecommerce backend đã chuyển từ cách xử lý event hạ tầng và tồn kho mang tính dự án riêng lẻ sang mô hình dùng framework ở những điểm có khả năng tái sử dụng cao, cụ thể là:
-- Kafka integration
-- reservation contract
-- quota-based resource hold
-- outbox-based event publishing
-- contract evolution qua topic envelope riêng
+- đang mang cả saga-like orchestration, outbox, reservation commands, joiner và nhiều listener custom
+- refactor eventing ở đây có blast radius cao hơn
 
-Sự thay đổi quan trọng nhất qua các phase là:
+### Những nơi chưa nên ưu tiên ở phase kế tiếp
 
-```text
-direct deduction -> reserve / confirm / release
-```
+- `api-gateway` với `lsf-gateway-starter`
+- toàn bộ sync HTTP stack
+- `lsf-saga-starter`
+- `lsf-outbox-postgres-starter`
 
-và tiếp theo là:
+## Khoảng cách lớn giữa framework docs và consumer usage hiện tại
 
-```text
-direct send -> append to outbox -> publish envelope
-```
+### 1. Cách consume framework chưa theo chuẩn BOM
 
-và ở phase 5.2 là:
+Framework docs xem BOM import từ `lsf-parent` là cách consume chuẩn. Consumer hiện mới dừng ở:
 
-```text
-reuse old topic -> introduce dedicated envelope topic
-```
+- `lsf.version` tập trung
+- root `dependencyManagement` cho từng artifact
 
-Đây là cơ sở kỹ thuật tốt để tiếp tục mở rộng sang:
-- outbox admin
-- observability
-- benchmark / resilience evaluation
+Đây là gap lớn nhất ở tầng dependency management.
+
+### 2. `lsf-contracts` mới được dùng một phần
+
+Framework docs mô tả `lsf-contracts` như shared contracts layer. Consumer hiện chỉ dùng rõ ở:
+
+- `EventEnvelope`
+- quota commands
+
+Trong khi:
+
+- domain events chính vẫn ở `common-events`
+- sync error model và request/trace context của LSF chưa được adopt rộng
+
+### 3. Eventing adoption đang hybrid
+
+Framework docs coi `lsf-eventing-starter` là stable path cho handler-style dispatch. Consumer hiện:
+
+- chỉ `notification-service` có `@LsfEventHandler`
+- `order-service`, `inventory-service`, `payment-service` vẫn là manual listeners
+- `notification-service` vẫn giữ listener legacy song song
+
+Tức là consumer mới chứng minh một path eventing cục bộ, chưa chứng minh eventing là baseline chung.
+
+### 4. Observability adoption chưa khớp framing của framework
+
+Framework docs gắn `lsf-observability-starter` với event dispatch concern. Consumer hiện có lệch:
+
+- `order-service`, `inventory-service`, `payment-service` có dependency observability nhưng chưa đi full eventing
+- `notification-service` lại có eventing mà chưa kéo `lsf-observability-starter`
+
+### 5. Version drift ở Confluent stack
+
+Framework docs compatibility matrix đang ghi baseline Confluent `7.6.0`, trong khi consumer hiện pin `7.6.1` ở nhiều module.
+
+Đây không phải blocker ngay lúc này, nhưng là drift cần được ghi nhận trong tài liệu consumer.
+
+## Kết luận
+
+Consumer hiện đang ở trạng thái:
+
+- đã qua checkpoint tốt cho stable core của event-driven stack, quota và MySQL outbox
+- chưa ở trạng thái "full LSF adoption"
+- đang có một số path hybrid cần được mô tả trung thực
+
+Nếu dùng framework docs mới làm source of truth, cách mô tả đúng nhất cho ecommerce hiện tại là:
+
+- `order-service`: contracts + Kafka baseline + MySQL outbox, chưa phải full eventing service
+- `inventory-service`: quota service đã migrate rõ nhất, Kafka vẫn còn custom
+- `notification-service`: eventing đã bắt đầu và là candidate tốt nhất cho phase kế tiếp
+- `payment-service`: mới ở mức Kafka baseline, chưa chuyển sang eventing contract của framework

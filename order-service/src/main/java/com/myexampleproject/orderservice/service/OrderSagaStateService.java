@@ -1,6 +1,8 @@
 package com.myexampleproject.orderservice.service;
 
+import com.myexampleproject.common.dto.OrderLineItemRequest;
 import com.myexampleproject.common.event.OrderStatusEvent;
+import com.myexampleproject.common.event.OrderValidatedEvent;
 import com.myexampleproject.orderservice.model.Order;
 import com.myexampleproject.orderservice.model.OrderLineItems;
 import com.myexampleproject.orderservice.repository.OrderRepository;
@@ -14,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OrderSagaStateService {
@@ -26,6 +30,7 @@ public class OrderSagaStateService {
     // Nếu project bạn đang dùng tên cũ thì đổi lại:
     // private static final String ORDER_STATUS_TOPIC = "order-status-topic";
 
+    private static final String ORDER_VALIDATED_TOPIC = "order-validated-envelope-topic";
     private static final String INVENTORY_RESERVATION_CONFIRM_TOPIC = "inventory-reservation-confirm-envelope-topic";
     private static final String INVENTORY_RESERVATION_RELEASE_TOPIC = "inventory-reservation-release-envelope-topic";
 
@@ -46,7 +51,8 @@ public class OrderSagaStateService {
         orderRepository.save(order);
 
         appendOrderStatusOutbox(order.getOrderNumber(), order.getStatus());
-        log.info("Order {} updated to VALIDATED and status event appended to outbox", orderNumber);
+        appendOrderValidatedOutbox(order);
+        log.info("Order {} updated to VALIDATED and status/validated events appended to outbox", orderNumber);
         return true;
     }
 
@@ -104,6 +110,30 @@ public class OrderSagaStateService {
         );
 
         outboxWriter.append(envelope, ORDER_STATUS_TOPIC, orderNumber);
+    }
+
+    private void appendOrderValidatedOutbox(Order order) {
+        List<OrderLineItemRequest> items = order.getOrderLineItemsList().stream()
+                .map(this::toOrderLineItemRequest)
+                .toList();
+
+        OrderValidatedEvent payload = new OrderValidatedEvent(order.getOrderNumber(), items);
+
+        EventEnvelope envelope = envelopeFactory.wrap(
+                "order.validated.v1",
+                order.getOrderNumber(),
+                order.getOrderNumber(),
+                payload
+        );
+
+        outboxWriter.append(envelope, ORDER_VALIDATED_TOPIC, order.getOrderNumber());
+    }
+
+    private OrderLineItemRequest toOrderLineItemRequest(OrderLineItems item) {
+        return OrderLineItemRequest.builder()
+                .skuCode(item.getSkuCode())
+                .quantity(item.getQuantity())
+                .build();
     }
 
     private void appendReservationConfirmOutbox(Order order) {

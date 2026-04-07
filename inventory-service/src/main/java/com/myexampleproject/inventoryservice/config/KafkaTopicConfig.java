@@ -68,12 +68,14 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic paymentProcessedTopic() {
+        // Deprecated in Phase 2.9a. Kept for topic-lifecycle sign-off and potential off-repo consumers.
         return TopicBuilder.name("payment-processed-topic")
                 .partitions(NUM_PARTITIONS).replicas(REPLICAS).build();
     }
 
     @Bean
     public NewTopic paymentFailedTopic() {
+        // Deprecated in Phase 2.9a. Kept for topic-lifecycle sign-off and potential off-repo consumers.
         return TopicBuilder.name("payment-failed-topic")
                 .partitions(NUM_PARTITIONS).replicas(REPLICAS).build();
     }

@@ -65,6 +65,7 @@ public class OrderService {
 
     //new
     private final OrderSagaStateService orderSagaStateService;
+    private final OrderPaymentResultProcessor orderPaymentResultProcessor;
 
     //Viết hàm này vì dùng @RequiredArgsConstructor với biến không có final , Counter
     @PostConstruct
@@ -96,7 +97,11 @@ public class OrderService {
     // LSF integration note:
     // the saga waits for all inventory results before deciding success/failure,
     // avoiding early failure when an order contains multiple SKUs.
-    @KafkaListener(topics = "inventory-check-result-topic", groupId = "order-saga-group")
+    @KafkaListener(
+            topics = "inventory-check-result-topic",
+            groupId = "order-saga-group",
+            containerFactory = "orderBatchKafkaListenerContainerFactory"
+    )
     public void handleInventoryCheckResult(List<ConsumerRecord<String, Object>> records) {
         log.info("SAGA: Received batch of {} inventory results", records.size());
 
@@ -176,7 +181,11 @@ public class OrderService {
     }
 
     // Dùng 1 group-id riêng cho việc xây dựng cache
-    @KafkaListener(topics = "product-cache-update-topic", groupId = "order-product-cacher")
+    @KafkaListener(
+            topics = "product-cache-update-topic",
+            groupId = "order-product-cacher",
+            containerFactory = "orderBatchKafkaListenerContainerFactory"
+    )
     public void handleProductCacheUpdate(List<ConsumerRecord<String, Object>> records) {
         log.info("Receiving {} product cache updates...", records.size());
         for (ConsumerRecord<String, Object> record : records) {
@@ -248,7 +257,11 @@ public class OrderService {
     // ==========================================================
     // SỬA LỖI 1 TẠI ĐÂY
     // ==========================================================
-    @KafkaListener(topics = "cart-checkout-topic", groupId = "order-updater-group")
+    @KafkaListener(
+            topics = "cart-checkout-topic",
+            groupId = "order-updater-group",
+            containerFactory = "orderBatchKafkaListenerContainerFactory"
+    )
     public void handleCartCheckout(List<ConsumerRecord<String, Object>> records) {
         log.info("Received a batch of {} cart-checkout events", records.size());
 
@@ -274,11 +287,9 @@ public class OrderService {
     @KafkaListener(
             topics = {
                     "order-placed-topic",
-                    "order-failed-topic",
-                    "payment-processed-topic",
-                    "payment-failed-topic"
+                    "order-failed-topic"
             },
-            containerFactory = "kafkaListenerContainerFactory" // <-- Dùng factory chung
+            containerFactory = "orderBatchKafkaListenerContainerFactory"
     )
     public void handleOrderEvents(List<ConsumerRecord<String, Object>> records) {
         log.info("Received a batch of {} events", records.size());
@@ -300,16 +311,6 @@ public class OrderService {
                     case "order-failed-topic":
                         OrderFailedEvent failedEvent = objectMapper.convertValue(payload, OrderFailedEvent.class);
                         handleOrderFailure(failedEvent); // Hàm private này giữ nguyên
-                        break;
-
-                    case "payment-processed-topic":
-                        PaymentProcessedEvent processedEvent = objectMapper.convertValue(payload, PaymentProcessedEvent.class);
-                        handlePaymentSuccess(processedEvent);
-                        break;
-
-                    case "payment-failed-topic":
-                        PaymentFailedEvent paymentFailedEvent = objectMapper.convertValue(payload, PaymentFailedEvent.class);
-                        handlePaymentFailure(paymentFailedEvent);
                         break;
 
                     default:
@@ -501,33 +502,7 @@ public class OrderService {
     // Payment success now confirms previously reserved quota instead of relying on early stock deduction.
     @Transactional
     protected void handlePaymentSuccess(PaymentProcessedEvent paymentProcessedEvent) {
-//        log.info("SUCCESS: Received PaymentProcessedEvent for Order {}. Payment ID: {}. Updating status...",
-//                paymentProcessedEvent.getOrderNumber(), paymentProcessedEvent.getPaymentId());
-//
-//        Order order = orderRepository.findByOrderNumberWithItems(paymentProcessedEvent.getOrderNumber())
-//                .orElseThrow(() -> new RuntimeException("Order not found: " + paymentProcessedEvent.getOrderNumber()));
-//
-//        if ("PENDING".equals(order.getStatus()) || "VALIDATED".equals(order.getStatus())) {
-//            order.setStatus("COMPLETED");
-//            orderRepository.save(order);
-//            publishConfirmCommands(order);
-////            kafkaTemplate.send("order-status-topic", order.getOrderNumber(),
-////                    new OrderStatusEvent(order.getOrderNumber(), order.getStatus()));
-//            appendOrderStatusOutbox(order.getOrderNumber(), order.getStatus());
-//            this.ordersCompletedCounter.increment();
-//            log.info("Order {} status updated to COMPLETED.", order.getOrderNumber());
-//        } else {
-//            log.warn("Received payment success for order {} but status was not PENDING/VALIDATED (Status: {}).",
-//                    order.getOrderNumber(), order.getStatus());
-//        }
-
-        boolean changed = orderSagaStateService.markCompletedAndEnqueueConfirm(paymentProcessedEvent.getOrderNumber());
-
-        if (changed) {
-            ordersCompletedCounter.increment();
-            log.info("Order {} status updated to COMPLETED.", paymentProcessedEvent.getOrderNumber());
-        }
-
+        orderPaymentResultProcessor.handlePaymentSuccess(paymentProcessedEvent, "legacy-topic", null);
     }
 
 //    @Transactional
@@ -561,36 +536,14 @@ public class OrderService {
     // Payment failure now releases reservation through lsf-contracts command flow.
     @Transactional
     protected void handlePaymentFailure(PaymentFailedEvent paymentFailedEvent) {
-//        log.warn("FAILED: Received PaymentFailedEvent for Order {}. Reason: {}. Updating status...",
-//                paymentFailedEvent.getOrderNumber(), paymentFailedEvent.getReason());
-//
-//        Order order = orderRepository.findByOrderNumberWithItems(paymentFailedEvent.getOrderNumber())
-//                .orElseThrow(() -> new RuntimeException("Order not found: " + paymentFailedEvent.getOrderNumber()));
-//
-//        if ("PENDING".equals(order.getStatus()) || "VALIDATED".equals(order.getStatus())) {
-//            order.setStatus("PAYMENT_FAILED");
-//            orderRepository.save(order);
-//            publishReleaseCommands(order, "PAYMENT_FAILED: " + paymentFailedEvent.getReason());
-////            kafkaTemplate.send("order-status-topic", order.getOrderNumber(),
-////                    new OrderStatusEvent(order.getOrderNumber(), order.getStatus()));
-//            appendOrderStatusOutbox(order.getOrderNumber(), order.getStatus());
-//            log.warn("Order {} status updated to PAYMENT_FAILED.", order.getOrderNumber());
-//        } else {
-//            log.warn("Received payment failure for order {} but status was not PENDING/VALIDATED (Status: {}).",
-//                    order.getOrderNumber(), order.getStatus());
-//        }
-        boolean changed = orderSagaStateService.markFailedAndEnqueueRelease(
-                paymentFailedEvent.getOrderNumber(),
-                "PAYMENT_FAILED",
-                "payment: " + paymentFailedEvent.getReason()
-        );
-
-        if (changed) {
-            log.warn("Order {} status updated to PAYMENT_FAILED.", paymentFailedEvent.getOrderNumber());
-        }
+        orderPaymentResultProcessor.handlePaymentFailure(paymentFailedEvent, "legacy-topic", null);
     }
 
-    @KafkaListener(topics = "order-validated-topic", groupId = "order-group")
+    @KafkaListener(
+            topics = "order-validated-topic",
+            groupId = "order-group",
+            containerFactory = "orderBatchKafkaListenerContainerFactory"
+    )
     public void handleValidated(List<ConsumerRecord<String, Object>> records) {
         log.info("SAGA SUCCESS: Received batch of {} validated events", records.size());
         for (ConsumerRecord<String, Object> record : records) {

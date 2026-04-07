@@ -1,68 +1,112 @@
 package com.myexampleproject.paymentservice.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myexampleproject.common.event.*;
-import lombok.RequiredArgsConstructor;
+import com.myexampleproject.common.event.OrderValidatedEvent;
+import com.myexampleproject.common.event.PaymentFailedEvent;
+import com.myexampleproject.common.event.PaymentProcessedEvent;
+import com.myorg.lsf.eventing.LsfPublishOptions;
+import com.myorg.lsf.eventing.LsfPublisher;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PaymentService {
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final ObjectMapper objectMapper;
 
-    // Kafka listener now relies on lsf-kafka-starter instead of a service-specific consumer configuration.
-    @KafkaListener(
-            topics = "order-validated-topic",
-            groupId = "payment-group"
-    )
-    public void handleOrderValidation(List<ConsumerRecord<String, Object>> records) {
-        log.info("Received batch of {} validated events", records.size());
+    public static final String PAYMENT_PROCESSED_ENVELOPE_TOPIC = "payment-processed-envelope-topic";
+    public static final String PAYMENT_FAILED_ENVELOPE_TOPIC = "payment-failed-envelope-topic";
+    public static final String PAYMENT_PROCESSED_EVENT_TYPE = "payment.processed.v1";
+    public static final String PAYMENT_FAILED_EVENT_TYPE = "payment.failed.v1";
 
-        for (ConsumerRecord<String, Object> record : records) {
-            try {
-                // 1. Convert từ record.value() sang object
-                OrderValidatedEvent event = objectMapper.convertValue(record.value(), OrderValidatedEvent.class);
-                log.info("Received OrderValidatedEvent for Order {}. Processing payment...",
-                        event.getOrderNumber());
-                boolean paymentSuccess = processPayment(event);
-                if (paymentSuccess) {
-                    String paymentId = UUID.randomUUID().toString();
-                    PaymentProcessedEvent successEvent = new PaymentProcessedEvent(
-                            event.getOrderNumber(),
-                            paymentId
-                    );
-                    kafkaTemplate.send("payment-processed-topic", event.getOrderNumber(), successEvent);
-                    log.info("Payment SUCCESS for Order {}. Payment ID: {}",
-                            event.getOrderNumber(), paymentId);
-                } else {
-                    PaymentFailedEvent failedEvent = new PaymentFailedEvent(
-                            event.getOrderNumber(),
-                            "Payment gateway declined."
-                    );
-                    kafkaTemplate.send("payment-failed-topic", event.getOrderNumber(), failedEvent);
-                    log.warn("Payment FAILED for Order {}. Reason: {}",
-                            event.getOrderNumber(), failedEvent.getReason());
-                }
-            } catch (Exception e) {
-                log.error("Lỗi xử lý payment cho key {}: {}", record.key(), e.getMessage(), e);
-            }
-        }
+    private final LsfPublisher lsfPublisher;
+    private final MeterRegistry meterRegistry;
+
+    @Autowired
+    public PaymentService(
+            LsfPublisher lsfPublisher,
+            MeterRegistry meterRegistry
+    ) {
+        this.lsfPublisher = lsfPublisher;
+        this.meterRegistry = meterRegistry;
     }
 
-//    private boolean processPayment(OrderValidatedEvent event) {
-//        log.info("Simulating payment processing for Order {}...", event.getOrderNumber());
-//        // Thêm logic phức tạp hơn nếu muốn (ví dụ: random thành công/thất bại)
-//        return true; // Luôn trả về thành công cho đơn giản
-//    }
+    PaymentService(LsfPublisher lsfPublisher) {
+        this(lsfPublisher, null);
+    }
+
+    public void processValidatedOrder(OrderValidatedEvent event, String source, String eventId) {
+        String orderNumber = event.getOrderNumber();
+        String safeEventId = eventId == null ? "legacy" : eventId;
+
+        log.info("Processing validated order {} from {} (eventId={})", orderNumber, source, safeEventId);
+
+        boolean paymentSuccess = processPayment(event);
+        if (paymentSuccess) {
+            String paymentId = UUID.randomUUID().toString();
+            PaymentProcessedEvent successEvent = new PaymentProcessedEvent(orderNumber, paymentId);
+            publishEnvelopeResult(
+                    PAYMENT_PROCESSED_ENVELOPE_TOPIC,
+                    PAYMENT_PROCESSED_EVENT_TYPE,
+                    orderNumber,
+                    successEvent,
+                    eventId,
+                    "processed"
+            );
+            log.info("Payment SUCCESS for order {} from {}. paymentId={}", orderNumber, source, paymentId);
+            return;
+        }
+
+        PaymentFailedEvent failedEvent = new PaymentFailedEvent(
+                orderNumber,
+                "Payment gateway declined."
+        );
+        publishEnvelopeResult(
+                PAYMENT_FAILED_ENVELOPE_TOPIC,
+                PAYMENT_FAILED_EVENT_TYPE,
+                orderNumber,
+                failedEvent,
+                eventId,
+                "failed"
+        );
+        log.warn("Payment FAILED for order {} from {}. reason={}", orderNumber, source, failedEvent.getReason());
+    }
+
+    private void publishEnvelopeResult(
+            String topic,
+            String eventType,
+            String orderNumber,
+            Object payload,
+            String causationId,
+            String result
+    ) {
+        lsfPublisher.publish(
+                topic,
+                orderNumber,
+                eventType,
+                orderNumber,
+                payload,
+                LsfPublishOptions.builder()
+                        .correlationId(orderNumber)
+                        .causationId(causationId)
+                        .build()
+        );
+        recordPublishMetric("envelope", result);
+    }
+
+    private void recordPublishMetric(String path, String result) {
+        if (meterRegistry == null) {
+            return;
+        }
+
+        meterRegistry.counter(
+                "payment_result_publish_total",
+                "path", path,
+                "result", result
+        ).increment();
+    }
 
     private boolean processPayment(OrderValidatedEvent event) {
         return simulatePaymentDecision(event);
@@ -71,6 +115,5 @@ public class PaymentService {
     private boolean simulatePaymentDecision(OrderValidatedEvent event) {
         int totalQty = event.getItems().stream().mapToInt(item -> item.getQuantity()).sum();
         return totalQty != 2;
-//        return false;
     }
 }

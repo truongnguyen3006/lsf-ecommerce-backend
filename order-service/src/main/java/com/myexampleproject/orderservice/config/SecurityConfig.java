@@ -1,6 +1,4 @@
 package com.myexampleproject.orderservice.config;
-
-import com.myexampleproject.inventoryservice.config.KeycloakJwtRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

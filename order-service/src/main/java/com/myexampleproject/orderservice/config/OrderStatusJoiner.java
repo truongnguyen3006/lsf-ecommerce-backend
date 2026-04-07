@@ -1,20 +1,25 @@
 package com.myexampleproject.orderservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myexampleproject.common.event.*;
+import com.myexampleproject.common.event.OrderStatusEvent;
+import com.myexampleproject.common.event.PaymentProcessedEvent;
 import com.myorg.lsf.contracts.core.envelope.EventEnvelope;
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
+import io.confluent.kafka.streams.serdes.json.KafkaJsonSchemaSerde;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Joined;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Produced;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
-import io.confluent.kafka.streams.serdes.json.KafkaJsonSchemaSerde;
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 
 import java.util.Map;
 
@@ -23,6 +28,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class OrderStatusJoiner {
+
     private final ObjectMapper objectMapper;
 
     @Value("${lsf.kafka.schema-registry-url}")
@@ -35,24 +41,15 @@ public class OrderStatusJoiner {
     }
 
     @Bean
-    public KStream<String, PaymentProcessedEvent> joinPaymentAndOrderStatus(StreamsBuilder builder) throws InterruptedException {
-//        Serde<OrderStatusEvent> statusSerde = jsonSerde(OrderStatusEvent.class);
+    public KStream<String, PaymentProcessedEvent> joinPaymentAndOrderStatus(StreamsBuilder builder) {
         Serde<PaymentProcessedEvent> paymentSerde = jsonSerde(PaymentProcessedEvent.class);
         Serde<EventEnvelope> envelopeSerde = jsonSerde(EventEnvelope.class);
 
-        // Tạo KTable từ order-status-topic (key = orderNumber)
-//        KTable<String, OrderStatusEvent> orderStatusTable = builder.table(
-//                "order-status-topic",
-//                Consumed.with(Serdes.String(), statusSerde)
-//        );
-        // order-status-topic is now published via LSF outbox, so records arrive as EventEnvelope.
         KTable<String, EventEnvelope> rawStatusTable = builder.table(
                 "order-status-envelope-topic",
                 Consumed.with(Serdes.String(), envelopeSerde)
         );
 
-        // unwrap payload từ EventEnvelope -> OrderStatusEvent
-        // Unwrap the domain payload from EventEnvelope before joining with payment events.
         KTable<String, OrderStatusEvent> orderStatusTable = rawStatusTable.mapValues(envelope -> {
             if (envelope == null || envelope.getPayload() == null) {
                 return null;
@@ -66,35 +63,60 @@ public class OrderStatusJoiner {
             }
         });
 
-        // Tạo KStream từ payment-processed-topic
-        KStream<String, PaymentProcessedEvent> paymentStream = builder.stream(
-                "payment-processed-topic",
-                Consumed.with(Serdes.String(), paymentSerde)
-        );
+        KStream<String, PaymentProcessedEvent> paymentStream = paymentProcessedEnvelopeStream(builder, envelopeSerde);
 
-        //  JOIN giữa payment và status
         KStream<String, PaymentProcessedEvent> validPayments = paymentStream.join(
                 orderStatusTable,
                 (payment, status) -> {
                     if (status == null) {
-                        log.warn("BỎ QUA PaymentProcessedEvent: Order {} chưa có trong order-status-topic", payment.getOrderNumber());
+                        log.warn("Skip PaymentProcessedEvent: order {} is missing from order-status-envelope-topic",
+                                payment.getOrderNumber());
                         return null;
                     }
+
                     String currentStatus = status.getStatus();
                     if (!"PENDING".equals(currentStatus) && !"VALIDATED".equals(currentStatus)) {
-                        log.warn("BỎ QUA PaymentProcessedEvent: Order {} không ở trạng thái PENDING (status={})",
-                                payment.getOrderNumber(), status.getStatus());
+                        log.warn(
+                                "Skip PaymentProcessedEvent: order {} is not in an acceptable state (status={})",
+                                payment.getOrderNumber(),
+                                currentStatus
+                        );
                         return null;
                     }
-                    log.info("VALID PaymentProcessedEvent cho Order {}", payment.getOrderNumber());
+
+                    log.info("Valid PaymentProcessedEvent for order {}", payment.getOrderNumber());
                     return payment;
                 },
                 Joined.with(Serdes.String(), paymentSerde, null)
-        ).filter((key, value) -> value != null); // Bỏ các record bị loại
+        ).filter((key, value) -> value != null);
 
-        // Gửi các event hợp lệ sang topic mới
         validPayments.to("payment-validated-topic", Produced.with(Serdes.String(), paymentSerde));
-
         return validPayments;
+    }
+
+    private KStream<String, PaymentProcessedEvent> paymentProcessedEnvelopeStream(
+            StreamsBuilder builder,
+            Serde<EventEnvelope> envelopeSerde
+    ) {
+        log.info("OrderStatusJoiner is reading envelope payment result topic payment-processed-envelope-topic");
+        return builder.stream(
+                        "payment-processed-envelope-topic",
+                        Consumed.with(Serdes.String(), envelopeSerde)
+                )
+                .mapValues(this::unwrapPaymentProcessedEnvelope)
+                .filter((key, value) -> value != null);
+    }
+
+    private PaymentProcessedEvent unwrapPaymentProcessedEnvelope(EventEnvelope envelope) {
+        if (envelope == null || envelope.getPayload() == null) {
+            return null;
+        }
+
+        try {
+            return objectMapper.convertValue(envelope.getPayload(), PaymentProcessedEvent.class);
+        } catch (Exception e) {
+            log.error("Failed to unwrap PaymentProcessedEvent from EventEnvelope. envelope={}", envelope, e);
+            return null;
+        }
     }
 }
