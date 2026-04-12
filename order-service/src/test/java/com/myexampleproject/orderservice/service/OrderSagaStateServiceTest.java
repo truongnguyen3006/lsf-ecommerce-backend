@@ -100,6 +100,32 @@ class OrderSagaStateServiceTest {
     }
 
     @Test
+    void shouldAppendOnlyStatusEnvelopeWhenSagaMarksOrderValidated() {
+        OrderOutboxEnvelopeFactory envelopeFactory = new OrderOutboxEnvelopeFactory(new ObjectMapper());
+        OrderSagaStateService service = new OrderSagaStateService(orderRepository, outboxWriter, envelopeFactory);
+        Order order = orderWithSingleItem("ORDER-SAGA-1", "PENDING");
+
+        when(orderRepository.findByOrderNumberWithItems("ORDER-SAGA-1")).thenReturn(Optional.of(order));
+        when(outboxWriter.append(any(EventEnvelope.class), anyString(), anyString())).thenReturn(1L);
+
+        boolean changed = service.markValidatedAndEnqueueStatusOnly("ORDER-SAGA-1");
+
+        assertTrue(changed);
+        assertEquals("VALIDATED", order.getStatus());
+
+        ArgumentCaptor<EventEnvelope> envelopeCaptor = ArgumentCaptor.forClass(EventEnvelope.class);
+        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(orderRepository).save(order);
+        verify(outboxWriter, times(1)).append(envelopeCaptor.capture(), topicCaptor.capture(), keyCaptor.capture());
+
+        assertEquals("order-status-envelope-topic", topicCaptor.getValue());
+        assertEquals("ecommerce.order.status.v1", envelopeCaptor.getValue().getEventType());
+        assertEquals("ORDER-SAGA-1", keyCaptor.getValue());
+    }
+
+    @Test
     void shouldAppendReleaseAndStatusEnvelopeWhenPaymentFails() {
         OrderOutboxEnvelopeFactory envelopeFactory = new OrderOutboxEnvelopeFactory(new ObjectMapper());
         OrderSagaStateService service = new OrderSagaStateService(orderRepository, outboxWriter, envelopeFactory);

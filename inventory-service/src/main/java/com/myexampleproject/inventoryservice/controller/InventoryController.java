@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myexampleproject.common.event.InventoryAdjustmentEvent;
 import com.myexampleproject.inventoryservice.dto.InventoryAvailabilityResponse;
+import com.myexampleproject.inventoryservice.service.InventoryAdjustmentPublisher;
 import com.myexampleproject.inventoryservice.service.InventoryAdjustmentGuardService;
 import com.myexampleproject.inventoryservice.service.InventoryAvailabilityService;
 import com.myexampleproject.inventoryservice.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class InventoryController {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final InventoryAdjustmentPublisher inventoryAdjustmentPublisher;
     private final InventoryService inventoryService;
     private final InventoryAvailabilityService inventoryAvailabilityService;
     private final InventoryAdjustmentGuardService inventoryAdjustmentGuardService;
@@ -62,7 +62,7 @@ public class InventoryController {
                 current,
                 delta
         );
-        kafkaTemplate.send("inventory-adjustment-topic", event.getSkuCode(), event);
+        inventoryAdjustmentPublisher.publish(event);
         Integer updated = inventoryService.waitForUpdatedQuantity(event.getSkuCode());
         if (updated == null)
             return ResponseEntity.accepted().body(Map.of("status", "queued"));

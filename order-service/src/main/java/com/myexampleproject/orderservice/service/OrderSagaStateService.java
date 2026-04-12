@@ -57,6 +57,27 @@ public class OrderSagaStateService {
     }
 
     @Transactional
+    public boolean markValidatedAndEnqueueStatusOnly(String orderNumber) {
+        Order order = loadOrderWithItems(orderNumber);
+
+        if (!"PENDING".equals(order.getStatus())) {
+            log.warn(
+                    "Ignore VALIDATED(status-only) transition for order {} because current status={}",
+                    orderNumber,
+                    order.getStatus()
+            );
+            return false;
+        }
+
+        order.setStatus("VALIDATED");
+        orderRepository.save(order);
+
+        appendOrderStatusOutbox(order.getOrderNumber(), order.getStatus());
+        log.info("Order {} updated to VALIDATED and status event appended to outbox", orderNumber);
+        return true;
+    }
+
+    @Transactional
     public boolean markCompletedAndEnqueueConfirm(String orderNumber) {
         Order order = loadOrderWithItems(orderNumber);
 

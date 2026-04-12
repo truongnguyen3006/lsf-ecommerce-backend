@@ -52,20 +52,20 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, OrderPlacedEvent> orderPlacedKafkaListenerContainerFactory() {
-        return singleRecordListenerContainerFactory(orderPlacedConsumerFactory());
-    }
+//    @Bean
+//    public ConcurrentKafkaListenerContainerFactory<String, OrderPlacedEvent> orderPlacedKafkaListenerContainerFactory() {
+//        return singleRecordListenerContainerFactory(orderPlacedConsumerFactory());
+//    }
 
     @Bean
     public ConsumerFactory<String, String> orderFailedRawConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(rawStringProps());
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> orderFailedRawKafkaListenerContainerFactory() {
-        return singleRecordListenerContainerFactory(orderFailedRawConsumerFactory());
-    }
+//    @Bean
+//    public ConcurrentKafkaListenerContainerFactory<String, String> orderFailedRawKafkaListenerContainerFactory() {
+//        return singleRecordListenerContainerFactory(orderFailedRawConsumerFactory());
+//    }
 
     /**
      * Generic container factory used by lsf-eventing-starter.

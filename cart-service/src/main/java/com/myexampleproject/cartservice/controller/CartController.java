@@ -1,14 +1,18 @@
 package com.myexampleproject.cartservice.controller;
 
-import com.myexampleproject.common.dto.CartItemRequest;
-import com.myexampleproject.common.event.CartLineItem;
 import com.myexampleproject.cartservice.model.CartEntity;
+import com.myexampleproject.cartservice.service.CartCheckoutRequestDispatcher;
 import com.myexampleproject.cartservice.service.CartService;
+import com.myexampleproject.common.dto.CartItemRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.concurrent.CompletableFuture;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -16,17 +20,18 @@ import java.util.concurrent.CompletableFuture;
 public class CartController {
 
     private final CartService cartService;
+    private final CartCheckoutRequestDispatcher cartCheckoutRequestDispatcher;
 
     @PostMapping("/add/{userId}")
     public ResponseEntity<?> addToCart(@PathVariable String userId, @RequestBody CartItemRequest item) {
-        cartService.addItem(userId, item); // Sửa: Không gán vào biến
-        return ResponseEntity.ok().build(); // Sửa: Trả về 200 OK rỗng
+        cartService.addItem(userId, item);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/remove/{userId}/{sku}")
-    public ResponseEntity<?> remove(@PathVariable String userId, @PathVariable String sku) { // Sửa 1: Đổi void -> ResponseEntity<?>
-        cartService.removeItem(userId, sku); // Sửa 2: Không gán vào biến
-        return ResponseEntity.ok().build(); // Sửa 3: Trả về 200 OK rỗng
+    public ResponseEntity<?> remove(@PathVariable String userId, @PathVariable String sku) {
+        cartService.removeItem(userId, sku);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/view/{userId}")
@@ -35,21 +40,11 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
-//    @PostMapping("/checkout/{userId}")
-//    public ResponseEntity<?> checkout(@PathVariable String userId) {
-//        cartService.checkout(userId);
-//        return ResponseEntity.accepted().body("Checkout queued");
-//    }
-
     @PostMapping("/checkout/{userId}")
-    public CompletableFuture<ResponseEntity<String>> checkout(@PathVariable String userId) {
-        return cartService.checkoutAsync(userId)
-                .thenApply(result -> {
-                    // Trả về 202 Accepted
-                    return ResponseEntity.accepted().body("Checkout queued");
-                })
-                .exceptionally(ex -> {
-                    return ResponseEntity.badRequest().body(ex.getMessage());
-                });
+    public ResponseEntity<String> checkout(@PathVariable String userId) {
+        if (cartCheckoutRequestDispatcher.dispatch(userId)) {
+            return ResponseEntity.accepted().body("Checkout queued");
+        }
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Checkout queue overloaded");
     }
 }

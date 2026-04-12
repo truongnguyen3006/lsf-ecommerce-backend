@@ -56,38 +56,10 @@
             </dependency>
             <dependency>
                 <groupId>com.myorg.lsf</groupId>
-                <artifactId>lsf-contracts</artifactId>
+                <artifactId>lsf-parent</artifactId>
                 <version>${lsf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.myorg.lsf</groupId>
-                <artifactId>lsf-kafka-starter</artifactId>
-                <version>${lsf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.myorg.lsf</groupId>
-                <artifactId>lsf-eventing-starter</artifactId>
-                <version>${lsf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.myorg.lsf</groupId>
-                <artifactId>lsf-quota-streams-starter</artifactId>
-                <version>${lsf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.myorg.lsf</groupId>
-                <artifactId>lsf-outbox-mysql-starter</artifactId>
-                <version>${lsf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.myorg.lsf</groupId>
-                <artifactId>lsf-outbox-admin-starter</artifactId>
-                <version>${lsf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.myorg.lsf</groupId>
-                <artifactId>lsf-observability-starter</artifactId>
-                <version>${lsf.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

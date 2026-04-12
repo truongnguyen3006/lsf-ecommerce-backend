@@ -28,7 +28,7 @@ public class CartKafkaConsumerConfig {
 
     // --- Tạo factory generic cho mọi loại event ---
     @Bean
-    public ConsumerFactory<String, Object> genericConsumerFactory() {
+    public ConsumerFactory<String, Object> cartGenericConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -52,10 +52,12 @@ public class CartKafkaConsumerConfig {
 
     // --- Tạo MỘT ContainerFactory chung cho mọi listener ---
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, Object> cartKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(genericConsumerFactory());
+        // Do not override the default kafkaListenerContainerFactory bean because the
+        // LSF envelope listener is explicitly wired to that bean name.
+        factory.setConsumerFactory(cartGenericConsumerFactory());
 
         // ⚙️ Hiệu năng cao
         factory.setConcurrency(10);              // 10 thread song song (tùy theo số partition)

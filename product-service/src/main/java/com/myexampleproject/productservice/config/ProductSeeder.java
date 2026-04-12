@@ -5,11 +5,11 @@ import com.myexampleproject.common.event.ProductCreatedEvent;
 import com.myexampleproject.productservice.model.Product;
 import com.myexampleproject.productservice.model.ProductVariant;
 import com.myexampleproject.productservice.repository.ProductRepository;
+import com.myexampleproject.productservice.service.ProductEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,29 +21,27 @@ import java.util.List;
 @Slf4j
 public class ProductSeeder implements CommandLineRunner {
 
-    private final ProductRepository productRepository;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-    // Inject Redis để kiểm tra trạng thái seed
-    private final RedisTemplate<String, Object> redisTemplate;
-
     private static final String SEED_KEY = "system:data:seeded";
+
+    private final ProductRepository productRepository;
+    private final ProductEventPublisher productEventPublisher;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     @Transactional
     public void run(String... args) {
-        // 1. Kiểm tra xem đã seed dữ liệu chưa (Tránh cộng dồn tồn kho khi restart)
         if (Boolean.TRUE.equals(redisTemplate.hasKey(SEED_KEY))) {
-            log.info("✅ Dữ liệu đã được đồng bộ trước đó. Bỏ qua bước Seeding.");
+            log.info("Du lieu da duoc dong bo truoc do. Bo qua buoc seeding.");
             return;
         }
 
         long count = productRepository.count();
         if (count == 0) {
-            log.info("🚫 Database MySQL trống. Vui lòng kiểm tra file init.sql.");
+            log.info("Database MySQL trong. Vui long kiem tra file init.sql.");
             return;
         }
 
-        log.info("🔄 PHÁT HIỆN KHỞI ĐỘNG LẦN ĐẦU - BẮT ĐẦU ĐỒNG BỘ {} SẢN PHẨM...", count);
+        log.info("Phat hien khoi dong lan dau. Bat dau dong bo {} san pham...", count);
         syncData();
     }
 
@@ -52,20 +50,19 @@ public class ProductSeeder implements CommandLineRunner {
         int variantCount = 0;
 
         for (Product product : products) {
-            if (product.getVariants() == null) continue;
+            if (product.getVariants() == null) {
+                continue;
+            }
 
             for (ProductVariant variant : product.getVariants()) {
                 String sku = variant.getSkuCode();
 
-                // 1. Gửi Event cho Inventory (Khởi tạo kho)
-                // Lưu ý: Logic aggregate của bạn là cộng dồn, nên chỉ gửi 1 lần duy nhất ở đây
                 ProductCreatedEvent inventoryEvent = ProductCreatedEvent.builder()
                         .skuCode(sku)
-                        .initialQuantity(10000) // Mặc định 100 cái cho mỗi SKU
+                        .initialQuantity(10000)
                         .build();
-                kafkaTemplate.send("product-created-topic", sku, inventoryEvent);
+                productEventPublisher.publishProductCreated(inventoryEvent);
 
-                // 2. Gửi Event cho Redis (Cache thông tin hiển thị)
                 ProductCacheEvent cacheEvent = ProductCacheEvent.builder()
                         .skuCode(sku)
                         .name(product.getName())
@@ -74,15 +71,13 @@ public class ProductSeeder implements CommandLineRunner {
                         .color(variant.getColor())
                         .size(variant.getSize())
                         .build();
-                kafkaTemplate.send("product-cache-update-topic", sku, cacheEvent);
+                productEventPublisher.publishProductCacheUpdate(cacheEvent);
 
                 variantCount++;
             }
         }
 
-        // Đánh dấu đã seed xong (Lưu trong Redis 1 ngày hoặc vĩnh viễn tùy bạn)
         redisTemplate.opsForValue().set(SEED_KEY, "true", Duration.ofHours(24));
-
-        log.info("✅ HOÀN TẤT SEEDING! Đã bắn event cho {} SKU.", variantCount);
+        log.info("Hoan tat seeding. Da ban event cho {} SKU.", variantCount);
     }
 }

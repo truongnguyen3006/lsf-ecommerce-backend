@@ -20,6 +20,7 @@ public class SecurityConfig {
 
                 // 2. Cấu hình tùy chỉnh
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         // Cho phép bất kỳ ai cũng có thể XEM (GET) sản phẩm
                         .requestMatchers(HttpMethod.GET, "/api/product/**").permitAll()
                         // Bắt buộc tất cả các request khác (POST, DELETE) phải xác thực

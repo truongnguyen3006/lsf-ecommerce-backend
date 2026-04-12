@@ -116,6 +116,11 @@
             <groupId>com.myorg.lsf</groupId>
             <artifactId>lsf-observability-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.myorg.lsf</groupId>
+            <artifactId>lsf-eventing-starter</artifactId>
+        </dependency>
+
 
     </dependencies>
 

@@ -39,4 +39,20 @@ public class KafkaConfig {
                 .replicas(1)
                 .build();
     }
+
+    @Bean
+    public NewTopic orderSagaInternalTopic(OrderWorkflowProperties workflowProperties) {
+        return TopicBuilder.name(workflowProperties.getSaga().getInternalTopic())
+                .partitions(10)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic orderSagaRepliesTopic(OrderWorkflowProperties workflowProperties) {
+        return TopicBuilder.name(workflowProperties.getSaga().getReplyTopic())
+                .partitions(10)
+                .replicas(1)
+                .build();
+    }
 }

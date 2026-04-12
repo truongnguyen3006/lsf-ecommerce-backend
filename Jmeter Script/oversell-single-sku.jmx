@@ -27,7 +27,7 @@
       </CookieManager>
       <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group">
-        <intProp name="ThreadGroup.num_threads">1300</intProp>
+        <intProp name="ThreadGroup.num_threads">400</intProp>
         <intProp name="ThreadGroup.ramp_time">10</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -40,7 +40,7 @@
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="filename">D:/CT439_NLN/Jmeter_kichban/data_oversell.csv</stringProp>
+          <stringProp name="filename">D:/IdeaProjects/ecommerce-backend/Jmeter Script/data_oversell.csv</stringProp>
           <boolProp name="ignoreFirstLine">false</boolProp>
           <boolProp name="quotedData">false</boolProp>
           <boolProp name="recycle">true</boolProp>
@@ -53,7 +53,7 @@
           <collectionProp name="Arguments.arguments">
             <elementProp name="RUN_PREFIX" elementType="Argument">
               <stringProp name="Argument.name">RUN_PREFIX</stringProp>
-              <stringProp name="Argument.value">run02</stringProp>
+              <stringProp name="Argument.value">run04</stringProp>
               <stringProp name="Argument.desc">Thay đổi thành &quot;run2&quot;, &quot;run3&quot; cho mỗi lần chạy mới.</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
@@ -68,12 +68,12 @@
             </elementProp>
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
-              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFU0VPVzB4VlpSaWpNVXRXYUNBWmxCckRCeEtWT2R5QkkwQlBRNkRpOGJRIn0.eyJleHAiOjE3NzQ5Njg1OTEsImlhdCI6MTc3NDk2ODI5MSwianRpIjoiMzRlMGY1ZmUtMjJjOC00YTVlLWFiMTEtMzhlYjU4ODFhZjQ4IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg1L3JlYWxtcy9zcHJpbmctYm9vdC1taWNyb3NlcnZpY2VzLXJlYWxtIiwic3ViIjoiNzdjMWE1YjktZWM2Yy00ZjhlLWIwOGMtZjBmZDI0Y2ZhMGFiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXNwcmluZy1ib290LW1pY3Jvc2VydmljZXMtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sInNwcmluZy1jbG91ZC1jbGllbnQiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicm9sZXMiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsImNsaWVudElkIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsImNsaWVudEFkZHJlc3MiOiIxNzIuMTkuMC4xIn0.zmhLt9vdzk2gMBsY1wqkNxJvIXLQukH_hWm5fQOw0zuTXnUtX9TaCDYwmlfn9vW_dynxYsLBWjH6tC22deYDh6qjXBAYoNtXfU3DGWzNWVmiVIOQzebp83DooPSxHZdF90vqTsd4ep5MfkS5GX6P3mePV2d2fsQ8eVbNC_No2qOYNoWDMquHXAQvgQLZRA1XpmJ6BwDU8WYKo2aw7Ix89cdeWl39_L2SlRmN_gpB3N-TnrqZLPd79BozOMt2olHj9fSRJDqZLUh0kKE7weGmBbqz7vnn6Y2yUVl4RTzy87U5sRvjfbL8xBoTXsa1eY9rfnNY_3rvDNxsgAObppFLfA</stringProp>
+              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFU0VPVzB4VlpSaWpNVXRXYUNBWmxCckRCeEtWT2R5QkkwQlBRNkRpOGJRIn0.eyJleHAiOjE3NzU5MDIyMTksImlhdCI6MTc3NTkwMTkxOSwianRpIjoiZWMzY2M5MjUtNjM5Ny00YWY3LWJlOGQtNDNlZTNlYWY2YmQ4IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg1L3JlYWxtcy9zcHJpbmctYm9vdC1taWNyb3NlcnZpY2VzLXJlYWxtIiwic3ViIjoiNzdjMWE1YjktZWM2Yy00ZjhlLWIwOGMtZjBmZDI0Y2ZhMGFiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXNwcmluZy1ib290LW1pY3Jvc2VydmljZXMtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sInNwcmluZy1jbG91ZC1jbGllbnQiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicm9sZXMiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsImNsaWVudElkIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsImNsaWVudEFkZHJlc3MiOiIxNzIuMTkuMC4xIn0.SdVJEMGqnzyd16seunxKMSvcRVjopU9jU8DQ5lCbHEg7jXx5RqELh5VhXVcwAwcKPaNBjSRLKDpV1flFJtnlj8XX4NydXHKCCQ66oeOqjlFEGnA-_ecwf8jeNCj66V24ftfdy6_McC73-vvt6Hn26Jnp5fVCWWhpB4yCjQfLOXK9sso9Dc06N5NpjuAP0wlhydHo2mqiHMru7hF1MKfitq1pxIp4v4wNxhmpQ7mDN0SCIP9QNml4RhhFM6F3z5hwl_OMZG09-E4Utoi_TEngkI3E-893PeRa5yBMerjX3uoTzvGQ2myMdoYjsn2wol3Xr4l6IQsTWcpT4kxWt9uc8g</stringProp>
             </elementProp>
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="01-add-cart">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="01-add-cart" enabled="true">
           <stringProp name="HTTPSampler.domain">172.28.115.19</stringProp>
           <stringProp name="HTTPSampler.port">8000</stringProp>
           <stringProp name="HTTPSampler.path">/api/cart/add/${RUN_PREFIX}_user_${__threadNum}</stringProp>
@@ -96,7 +96,7 @@
         </HTTPSamplerProxy>
         <hashTree/>
         <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Synchronizing Timer">
-          <intProp name="groupSize">1300</intProp>
+          <intProp name="groupSize">400</intProp>
           <longProp name="timeoutInMs">0</longProp>
         </SyncTimer>
         <hashTree/>
