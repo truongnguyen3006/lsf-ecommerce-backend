@@ -13,7 +13,7 @@ Backend này là **consumer project** để kiểm chứng framework **LSF** tro
 
 | Service | Module LSF đã dùng | Vai trò trong hệ thống |
 |---|---|---|
-| `inventory-service` | `lsf-quota-streams-starter`, `lsf-contracts`, `lsf-kafka-starter`, `lsf-observability-starter` | Chuyển logic giữ hàng từ trừ stock trực tiếp sang `reserve / confirm / release`, expose thêm availability |
+| `inventory-service` | `lsf-quota-starter`, `lsf-contracts`, `lsf-kafka-starter`, `lsf-observability-starter` | Chuyển logic giữ hàng từ trừ stock trực tiếp sang `reserve / confirm / release`, expose thêm availability |
 | `order-service` | `lsf-kafka-starter`, `lsf-contracts`, `lsf-outbox-mysql-starter`, `lsf-outbox-admin-starter`, `lsf-observability-starter`, `lsf-saga-starter`, `lsf-kafka-admin-starter` | Điều phối order flow, append status event vào outbox, bật admin/evidence surfaces cho outbox, Kafka admin và saga runtime |
 | `payment-service` | `lsf-kafka-starter`, `lsf-observability-starter`, `lsf-eventing-starter` | Phát payment result theo event envelope và tham gia flow xác nhận hoặc release reservation |
 | `notification-service` | `lsf-eventing-starter` | Nhận status event dạng envelope để đẩy cập nhật realtime |

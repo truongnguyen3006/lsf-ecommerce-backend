@@ -20,14 +20,14 @@
         <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
       </ConfigTestElement>
       <hashTree/>
-      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager">
         <collectionProp name="CookieManager.cookies"/>
         <boolProp name="CookieManager.clearEachIteration">false</boolProp>
         <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
       </CookieManager>
       <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group">
-        <intProp name="ThreadGroup.num_threads">400</intProp>
+        <intProp name="ThreadGroup.num_threads">1000</intProp>
         <intProp name="ThreadGroup.ramp_time">10</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -68,12 +68,12 @@
             </elementProp>
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
-              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFU0VPVzB4VlpSaWpNVXRXYUNBWmxCckRCeEtWT2R5QkkwQlBRNkRpOGJRIn0.eyJleHAiOjE3NzU5MDIyMTksImlhdCI6MTc3NTkwMTkxOSwianRpIjoiZWMzY2M5MjUtNjM5Ny00YWY3LWJlOGQtNDNlZTNlYWY2YmQ4IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg1L3JlYWxtcy9zcHJpbmctYm9vdC1taWNyb3NlcnZpY2VzLXJlYWxtIiwic3ViIjoiNzdjMWE1YjktZWM2Yy00ZjhlLWIwOGMtZjBmZDI0Y2ZhMGFiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXNwcmluZy1ib290LW1pY3Jvc2VydmljZXMtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sInNwcmluZy1jbG91ZC1jbGllbnQiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicm9sZXMiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsImNsaWVudElkIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsImNsaWVudEFkZHJlc3MiOiIxNzIuMTkuMC4xIn0.SdVJEMGqnzyd16seunxKMSvcRVjopU9jU8DQ5lCbHEg7jXx5RqELh5VhXVcwAwcKPaNBjSRLKDpV1flFJtnlj8XX4NydXHKCCQ66oeOqjlFEGnA-_ecwf8jeNCj66V24ftfdy6_McC73-vvt6Hn26Jnp5fVCWWhpB4yCjQfLOXK9sso9Dc06N5NpjuAP0wlhydHo2mqiHMru7hF1MKfitq1pxIp4v4wNxhmpQ7mDN0SCIP9QNml4RhhFM6F3z5hwl_OMZG09-E4Utoi_TEngkI3E-893PeRa5yBMerjX3uoTzvGQ2myMdoYjsn2wol3Xr4l6IQsTWcpT4kxWt9uc8g</stringProp>
+              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFU0VPVzB4VlpSaWpNVXRXYUNBWmxCckRCeEtWT2R5QkkwQlBRNkRpOGJRIn0.eyJleHAiOjE3NzYwMjc1NTksImlhdCI6MTc3NjAwOTU1OSwianRpIjoiN2IzYjFjN2ItMzM3Mi00ODI3LWI3YmYtN2ViMzZmMmEzZWYzIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg1L3JlYWxtcy9zcHJpbmctYm9vdC1taWNyb3NlcnZpY2VzLXJlYWxtIiwic3ViIjoiNzdjMWE1YjktZWM2Yy00ZjhlLWIwOGMtZjBmZDI0Y2ZhMGFiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXNwcmluZy1ib290LW1pY3Jvc2VydmljZXMtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sInNwcmluZy1jbG91ZC1jbGllbnQiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicm9sZXMiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsImNsaWVudElkIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsImNsaWVudEFkZHJlc3MiOiIxNzIuMTkuMC4xIn0.Upe6fkSKoKChX1SrZXwhwguODjxs8st1-9C8ebK3kChytShHPJFu6eYVMi7tJcwyrSUNrvx3JPkjyrt6x4K6VXMH386aEtQvLJN1Cp_GFF2LFTOM49X3S2b6EWOQBM9ZaYEvE0wNl9hjuglIXkqkZ9pJ3L9zPvMyCaRhj7Nit3KCOQVZYIIt0ZUFyDGSZ_a4cJpeFSzFX4BskJzyBb7lgQp8bs7AfNwKp_CdzMycNur5wzw0_XS9CNjXaUccVkmu1TkIyJFosEhUAqqNixWElR7ZVQtw0u7YGE82SMyVrBlGLIiPIcnB5nF_xnJAgiYMYb-GuhjZ289ui-oFvv7nlw</stringProp>
             </elementProp>
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="01-add-cart" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="01-add-cart">
           <stringProp name="HTTPSampler.domain">172.28.115.19</stringProp>
           <stringProp name="HTTPSampler.port">8000</stringProp>
           <stringProp name="HTTPSampler.path">/api/cart/add/${RUN_PREFIX}_user_${__threadNum}</stringProp>
@@ -96,7 +96,7 @@
         </HTTPSamplerProxy>
         <hashTree/>
         <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Synchronizing Timer">
-          <intProp name="groupSize">400</intProp>
+          <intProp name="groupSize">1000</intProp>
           <longProp name="timeoutInMs">0</longProp>
         </SyncTimer>
         <hashTree/>

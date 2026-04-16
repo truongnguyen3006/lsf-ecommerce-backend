@@ -19,7 +19,7 @@ Consumer repo:
 | Service | LSF dependencies hiện dùng |
 | --- | --- |
 | `order-service` | `lsf-contracts`, `lsf-kafka-starter`, `lsf-outbox-mysql-starter`, `lsf-outbox-admin-starter`, `lsf-observability-starter` |
-| `inventory-service` | `lsf-quota-streams-starter`, `lsf-contracts`, `lsf-kafka-starter`, `lsf-observability-starter` |
+| `inventory-service` | `lsf-quota-starter`, `lsf-contracts`, `lsf-kafka-starter`, `lsf-observability-starter` |
 | `notification-service` | `lsf-kafka-starter`, `lsf-eventing-starter` |
 | `payment-service` | `lsf-kafka-starter`, `lsf-observability-starter` |
 

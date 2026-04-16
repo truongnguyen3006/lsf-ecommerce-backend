@@ -21,7 +21,7 @@ Consumer hiện đã dùng một phần stable core của LSF cho event-driven f
 - đã chuẩn hóa baseline Java 21 và gom `lsf.version` ở root POM
 - đã dùng `lsf-kafka-starter` ở 4 service chính có liên quan đến luồng order/inventory/payment/notification
 - đã dùng `lsf-contracts` cho `EventEnvelope` và quota commands
-- đã dùng `lsf-quota-streams-starter` ở `inventory-service`
+- đã dùng `lsf-quota-starter` ở `inventory-service`
 - đã dùng `lsf-outbox-mysql-starter` + `lsf-outbox-admin-starter` ở `order-service`
 - mới chỉ có `notification-service` đi vào `lsf-eventing-starter`
 - chưa có service nào hoàn tất full golden path sync HTTP của framework
@@ -34,7 +34,7 @@ Consumer hiện đã dùng một phần stable core của LSF cho event-driven f
 | Service | Module LSF trong POM | Trạng thái hiện tại |
 | --- | --- | --- |
 | `order-service` | `lsf-contracts`, `lsf-kafka-starter`, `lsf-outbox-mysql-starter`, `lsf-outbox-admin-starter`, `lsf-observability-starter` | Đã migrate contracts + Kafka baseline + MySQL outbox; chưa migrate sang eventing/publisher API; admin tooling đã bật nội bộ |
-| `inventory-service` | `lsf-quota-streams-starter`, `lsf-contracts`, `lsf-kafka-starter`, `lsf-observability-starter` | Đã migrate quota concern; Kafka vẫn là manual listener + Kafka Streams topology custom |
+| `inventory-service` | `lsf-quota-starter`, `lsf-contracts`, `lsf-kafka-starter`, `lsf-observability-starter` | Đã migrate quota concern; Kafka vẫn là manual listener + Kafka Streams topology custom |
 | `notification-service` | `lsf-kafka-starter`, `lsf-eventing-starter` | Đã có một path eventing thật cho order status, nhưng service vẫn còn listener legacy song song |
 | `payment-service` | `lsf-kafka-starter`, `lsf-observability-starter` | Mới migrate transport/runtime baseline; business handlers vẫn dùng `@KafkaListener` + `KafkaTemplate` trực tiếp |
 
@@ -133,7 +133,7 @@ Chưa migrate hết:
 
 Đã migrate:
 
-- `inventory-service` dùng `lsf-quota-streams-starter`
+- `inventory-service` dùng `lsf-quota-starter`
 - business adapter `InventoryQuotaService` đã map concern inventory sang quota API
 - `reserve -> confirm -> release` đã trở thành concern framework hóa rõ nhất trong consumer hiện tại
 

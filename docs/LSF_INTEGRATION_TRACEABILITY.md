@@ -83,7 +83,7 @@ Framework docs dùng để đối chiếu:
 
 #### Module LSF trong POM
 
-- `lsf-quota-streams-starter`
+- `lsf-quota-starter`
 - `lsf-contracts`
 - `lsf-kafka-starter`
 - `lsf-observability-starter`
@@ -100,7 +100,7 @@ Framework docs dùng để đối chiếu:
 
 #### Đã migrate
 
-- `lsf-quota-streams-starter`
+- `lsf-quota-starter`
   - dùng `QuotaService`
   - dùng `QuotaQueryFacade`
   - dùng `QuotaSnapshot`
@@ -200,7 +200,7 @@ Framework docs dùng để đối chiếu:
 | `lsf-observability-starter` | `order-service`, `inventory-service`, `payment-service` | Có dependency/config, nhưng chưa đồng nhất với eventing path |
 | `lsf-outbox-mysql-starter` | `order-service` | Đã dùng thật |
 | `lsf-outbox-admin-starter` | `order-service` | Đã bật nội bộ |
-| `lsf-quota-streams-starter` | `inventory-service` | Đã dùng thật |
+| `lsf-quota-starter` | `inventory-service` | Đã dùng thật |
 
 ## Khoảng cách lớn so với framework docs
 
