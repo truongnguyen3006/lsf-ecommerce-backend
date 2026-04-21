@@ -25,7 +25,12 @@ public class NotificationPaymentResultDispatcher {
         );
         messagingTemplate.convertAndSend(
                 "/topic/order/" + event.getOrderNumber(),
-                Map.of("status", "COMPLETED", "message", "Thanh toÃ¡n thÃ nh cÃ´ng! ÄÆ¡n hÃ ng hoÃ n táº¥t.")
+                Map.of(
+                        "status",
+                        "COMPLETED",
+                        "message",
+                        "Thanh toán đã thành công. Hệ thống đang xác nhận giữ chỗ để hoàn tất đơn hàng."
+                )
         );
     }
 
@@ -38,7 +43,12 @@ public class NotificationPaymentResultDispatcher {
         );
         messagingTemplate.convertAndSend(
                 "/topic/order/" + event.getOrderNumber(),
-                Map.of("status", "PAYMENT_FAILED", "message", "Thanh toÃ¡n lá»—i: " + event.getReason())
+                Map.of(
+                        "status",
+                        "PAYMENT_FAILED",
+                        "message",
+                        "Thanh toán không thành công. Hệ thống đang hoàn lại giữ chỗ: " + event.getReason()
+                )
         );
     }
 }

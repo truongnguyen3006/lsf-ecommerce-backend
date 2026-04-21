@@ -1,6 +1,7 @@
 package com.myexampleproject.orderservice.service;
 
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.InventoryCheckRequest;
 import com.myexampleproject.common.event.InventoryCheckResult;
 import com.myorg.lsf.contracts.core.envelope.EventEnvelope;
@@ -49,7 +50,8 @@ class OrderSagaInventoryBridgeServiceTest {
                 .build();
         OrderInventoryValidationRequestedCommand command = new OrderInventoryValidationRequestedCommand(
                 "ORDER-1",
-                List.of(item("SKU-1"), item("SKU-2"))
+                List.of(item("SKU-1"), item("SKU-2")),
+                PaymentMethod.COD
         );
 
         service.startInventoryValidation(envelope, command, "order-saga-replies-topic");
@@ -83,7 +85,11 @@ class OrderSagaInventoryBridgeServiceTest {
 
         service.startInventoryValidation(
                 envelope,
-                new OrderInventoryValidationRequestedCommand("ORDER-2", List.of(item("SKU-1"), item("SKU-2"))),
+                new OrderInventoryValidationRequestedCommand(
+                        "ORDER-2",
+                        List.of(item("SKU-1"), item("SKU-2")),
+                        PaymentMethod.MOCK_SUCCESS
+                ),
                 "order-saga-replies-topic"
         );
 
@@ -124,7 +130,11 @@ class OrderSagaInventoryBridgeServiceTest {
 
         service.startInventoryValidation(
                 envelope,
-                new OrderInventoryValidationRequestedCommand("ORDER-3", List.of(item("SKU-1"), item("SKU-2"))),
+                new OrderInventoryValidationRequestedCommand(
+                        "ORDER-3",
+                        List.of(item("SKU-1"), item("SKU-2")),
+                        PaymentMethod.MOCK_SUCCESS
+                ),
                 "order-saga-replies-topic"
         );
 

@@ -115,7 +115,8 @@ public class InventoryTopology {
                                 InventoryCheckResult result = inventoryQuotaService.reserve(
                                         request.getOrderNumber(),
                                         request.getItem(),
-                                        currentStock
+                                        currentStock,
+                                        request.getPaymentMethod()
                                 );
 
                                 return KeyValue.pair(request.getOrderNumber(), result);

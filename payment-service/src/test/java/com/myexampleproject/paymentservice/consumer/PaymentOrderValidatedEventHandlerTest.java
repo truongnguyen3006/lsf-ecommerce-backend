@@ -1,6 +1,7 @@
 package com.myexampleproject.paymentservice.consumer;
 
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.OrderValidatedEvent;
 import com.myexampleproject.paymentservice.service.PaymentService;
 import com.myorg.lsf.contracts.core.envelope.EventEnvelope;
@@ -29,7 +30,8 @@ class PaymentOrderValidatedEventHandlerTest {
                 .build();
         OrderValidatedEvent payload = new OrderValidatedEvent(
                 "ORDER-1",
-                List.of(new OrderLineItemRequest("SKU-1", 1))
+                List.of(new OrderLineItemRequest("SKU-1", 1)),
+                PaymentMethod.MOCK_SUCCESS
         );
 
         handler.handle(envelope, payload);

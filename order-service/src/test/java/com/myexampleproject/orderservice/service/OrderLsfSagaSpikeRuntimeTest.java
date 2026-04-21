@@ -2,6 +2,7 @@ package com.myexampleproject.orderservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.InventoryCheckResult;
 import com.myexampleproject.common.event.OrderPlacedEvent;
 import com.myexampleproject.common.event.OrderValidatedEvent;
@@ -146,7 +147,7 @@ class OrderLsfSagaSpikeRuntimeTest {
         assertThat(workflowProperties.getMode()).isEqualTo(OrderWorkflowMode.LSF_SAGA);
 
         workflowService.startOrderSaga(
-                orderPlaced(orderNumber, List.of(item("SKU-1", 1))),
+                orderPlaced(orderNumber, List.of(item("SKU-1", 1)), PaymentMethod.MOCK_SUCCESS),
                 sourceEnvelope(orderNumber)
         );
 
@@ -166,7 +167,7 @@ class OrderLsfSagaSpikeRuntimeTest {
         when(orderSagaStateService.markFailedAndEnqueueRelease(eq(orderNumber), eq("FAILED"), contains("Inventory rejected"))).thenReturn(true);
 
         workflowService.startOrderSaga(
-                orderPlaced(orderNumber, List.of(item("FAIL-INV-1", 1))),
+                orderPlaced(orderNumber, List.of(item("FAIL-INV-1", 1)), PaymentMethod.MOCK_SUCCESS),
                 sourceEnvelope(orderNumber)
         );
 
@@ -189,7 +190,7 @@ class OrderLsfSagaSpikeRuntimeTest {
         when(orderSagaStateService.markFailedAndEnqueueRelease(eq(orderNumber), eq("PAYMENT_FAILED"), contains("payment:"))).thenReturn(true);
 
         workflowService.startOrderSaga(
-                orderPlaced(orderNumber, List.of(item("SKU-1", 1), item("SKU-2", 1))),
+                orderPlaced(orderNumber, List.of(item("SKU-1", 1), item("SKU-2", 1)), PaymentMethod.MOCK_FAIL),
                 sourceEnvelope(orderNumber)
         );
 
@@ -213,7 +214,7 @@ class OrderLsfSagaSpikeRuntimeTest {
         workflowPublisher.pauseInventoryReplies();
 
         workflowService.startOrderSaga(
-                orderPlaced(orderNumber, List.of(item("SKU-DELAYED", 1))),
+                orderPlaced(orderNumber, List.of(item("SKU-DELAYED", 1)), PaymentMethod.MOCK_SUCCESS),
                 sourceEnvelope(orderNumber)
         );
 
@@ -238,7 +239,7 @@ class OrderLsfSagaSpikeRuntimeTest {
         when(orderSagaStateService.markFailedAndEnqueueRelease(eq(orderNumber), eq("PAYMENT_FAILED"), contains("payment timeout"))).thenReturn(true);
 
         workflowService.startOrderSaga(
-                orderPlaced(orderNumber, List.of(item("NO-PAY-1", 1))),
+                orderPlaced(orderNumber, List.of(item("NO-PAY-1", 1)), PaymentMethod.MOCK_TIMEOUT),
                 sourceEnvelope(orderNumber)
         );
 
@@ -298,8 +299,8 @@ class OrderLsfSagaSpikeRuntimeTest {
         fail("Expected pending replies %s but was %s".formatted(expected, workflowPublisher.pendingReplies().size()));
     }
 
-    private OrderPlacedEvent orderPlaced(String orderNumber, List<OrderLineItemRequest> items) {
-        return new OrderPlacedEvent(orderNumber, "user-1", items);
+    private OrderPlacedEvent orderPlaced(String orderNumber, List<OrderLineItemRequest> items, PaymentMethod paymentMethod) {
+        return new OrderPlacedEvent(orderNumber, "user-1", items, paymentMethod);
     }
 
     private EventEnvelope sourceEnvelope(String orderNumber) {
@@ -409,18 +410,15 @@ class OrderLsfSagaSpikeRuntimeTest {
 
         @LsfEventHandler(value = "order.validated.v1", payload = OrderValidatedEvent.class)
         public void onValidated(EventEnvelope envelope, OrderValidatedEvent payload) {
-            boolean skipReply = payload.getItems().stream()
-                    .map(OrderLineItemRequest::getSkuCode)
-                    .anyMatch(sku -> sku.startsWith("NO-PAY"));
+            PaymentMethod paymentMethod = payload.getPaymentMethod() == null
+                    ? PaymentMethod.defaultMethod()
+                    : payload.getPaymentMethod();
 
-            if (skipReply) {
+            if (paymentMethod == PaymentMethod.MOCK_TIMEOUT) {
                 return;
             }
 
-            int totalQuantity = payload.getItems().stream().mapToInt(OrderLineItemRequest::getQuantity).sum();
-            boolean failPayment = totalQuantity == 2;
-
-            if (failPayment) {
+            if (paymentMethod == PaymentMethod.MOCK_FAIL) {
                 publisher.publish(
                         "payment-failed-envelope-topic",
                         payload.getOrderNumber(),

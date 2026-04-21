@@ -2,6 +2,7 @@ package com.myexampleproject.orderservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.myexampleproject.common.dto.OrderLineItemsDto;
+import com.myexampleproject.common.dto.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,4 +35,5 @@ public class OrderResponse {
     private String userId;
     private String customerName;
     private String customerEmail;
+    private PaymentMethod paymentMethod;
 }

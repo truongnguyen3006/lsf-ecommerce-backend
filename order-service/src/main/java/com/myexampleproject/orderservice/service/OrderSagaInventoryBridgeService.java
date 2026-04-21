@@ -52,7 +52,7 @@ public class OrderSagaInventoryBridgeService {
 
         for (OrderLineItemRequest item : command.items()) {
             orderWorkflowPublisher.publishInventoryCheckRequest(
-                    new InventoryCheckRequest(command.orderNumber(), item)
+                    new InventoryCheckRequest(command.orderNumber(), item, command.paymentMethod())
             );
         }
 

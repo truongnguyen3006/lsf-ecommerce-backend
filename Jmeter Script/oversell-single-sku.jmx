@@ -20,7 +20,7 @@
         <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
       </ConfigTestElement>
       <hashTree/>
-      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager">
+      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
         <collectionProp name="CookieManager.cookies"/>
         <boolProp name="CookieManager.clearEachIteration">false</boolProp>
         <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
@@ -37,7 +37,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config">
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
           <stringProp name="delimiter">,</stringProp>
           <stringProp name="fileEncoding"></stringProp>
           <stringProp name="filename">D:/IdeaProjects/ecommerce-backend/Jmeter Script/data_oversell.csv</stringProp>
@@ -49,7 +49,7 @@
           <stringProp name="variableNames">skuCode</stringProp>
         </CSVDataSet>
         <hashTree/>
-        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
           <collectionProp name="Arguments.arguments">
             <elementProp name="RUN_PREFIX" elementType="Argument">
               <stringProp name="Argument.name">RUN_PREFIX</stringProp>
@@ -68,7 +68,7 @@
             </elementProp>
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
-              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFU0VPVzB4VlpSaWpNVXRXYUNBWmxCckRCeEtWT2R5QkkwQlBRNkRpOGJRIn0.eyJleHAiOjE3NzYwMjc1NTksImlhdCI6MTc3NjAwOTU1OSwianRpIjoiN2IzYjFjN2ItMzM3Mi00ODI3LWI3YmYtN2ViMzZmMmEzZWYzIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg1L3JlYWxtcy9zcHJpbmctYm9vdC1taWNyb3NlcnZpY2VzLXJlYWxtIiwic3ViIjoiNzdjMWE1YjktZWM2Yy00ZjhlLWIwOGMtZjBmZDI0Y2ZhMGFiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXNwcmluZy1ib290LW1pY3Jvc2VydmljZXMtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sInNwcmluZy1jbG91ZC1jbGllbnQiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicm9sZXMiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsImNsaWVudElkIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsImNsaWVudEFkZHJlc3MiOiIxNzIuMTkuMC4xIn0.Upe6fkSKoKChX1SrZXwhwguODjxs8st1-9C8ebK3kChytShHPJFu6eYVMi7tJcwyrSUNrvx3JPkjyrt6x4K6VXMH386aEtQvLJN1Cp_GFF2LFTOM49X3S2b6EWOQBM9ZaYEvE0wNl9hjuglIXkqkZ9pJ3L9zPvMyCaRhj7Nit3KCOQVZYIIt0ZUFyDGSZ_a4cJpeFSzFX4BskJzyBb7lgQp8bs7AfNwKp_CdzMycNur5wzw0_XS9CNjXaUccVkmu1TkIyJFosEhUAqqNixWElR7ZVQtw0u7YGE82SMyVrBlGLIiPIcnB5nF_xnJAgiYMYb-GuhjZ289ui-oFvv7nlw</stringProp>
+              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFU0VPVzB4VlpSaWpNVXRXYUNBWmxCckRCeEtWT2R5QkkwQlBRNkRpOGJRIn0.eyJleHAiOjE3NzcwNzkxMTQsImlhdCI6MTc3NjY0NzExMywianRpIjoiZDZiM2E1OWMtNjM4YS00OGQ1LWIyNGYtNDdkZjdiNjgyOTM2IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg1L3JlYWxtcy9zcHJpbmctYm9vdC1taWNyb3NlcnZpY2VzLXJlYWxtIiwic3ViIjoiNzdjMWE1YjktZWM2Yy00ZjhlLWIwOGMtZjBmZDI0Y2ZhMGFiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXNwcmluZy1ib290LW1pY3Jvc2VydmljZXMtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sInNwcmluZy1jbG91ZC1jbGllbnQiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicm9sZXMiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsImNsaWVudElkIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsImNsaWVudEFkZHJlc3MiOiIxNzIuMTkuMC4xIn0.2HHlpsFxQ-WnQ45g3kNM-ok-xavUqLnBnEl4Vo8K9VHGYCXUaIKelbUqokkPqemTyE_Hj0SeuWg6BnqwuNyYBii3XckLf5FtmyrfTQis0XdIsaHNMZYXXFEU9JuIdeOrUX6FzW1QzpxynUzhIbQ4i_5NkLfyGCOboEs_29kjGbcd4ApY1E7V54XKzph533KHddWmBVHeA3bkmrBgksIq1hl10gtKR_vkq2iB3A68_82PvkOYWzK5Fuwpoej0lAb7p2zYEUHXiwzfDh2I2G7za1x3UNqfmpZF4wlxhWygu615x8-RYzIBKtGoPEhQnjUOKNeMtNtxHNKGf9bIQfMeTQ</stringProp>
             </elementProp>
           </collectionProp>
         </HeaderManager>
@@ -100,20 +100,28 @@
           <longProp name="timeoutInMs">0</longProp>
         </SyncTimer>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="02-checkout">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="02-checkout" enabled="true">
           <stringProp name="HTTPSampler.domain">172.28.115.19</stringProp>
           <stringProp name="HTTPSampler.port">8000</stringProp>
           <stringProp name="HTTPSampler.path">/api/cart/checkout/${RUN_PREFIX}_user_${__threadNum}</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-            <collectionProp name="Arguments.arguments"/>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&#xd;
+  &quot;paymentMethod&quot;: &quot;COD&quot;&#xd;
+}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -150,7 +158,7 @@
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
           <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
             <name>saveConfig</name>

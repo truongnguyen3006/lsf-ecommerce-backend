@@ -2,6 +2,7 @@ package com.myexampleproject.orderservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.OrderPlacedEvent;
 import com.myexampleproject.orderservice.config.OrderWorkflowMode;
 import com.myexampleproject.orderservice.config.OrderWorkflowProperties;
@@ -68,9 +69,12 @@ class OrderServiceWorkflowRoutingTest {
 
         doNothing().when(service).handleOrderPlacement(any(OrderPlacedEvent.class));
 
-        service.placeOrder(new OrderRequest(List.of(
-                OrderLineItemRequest.builder().skuCode("SKU-1").quantity(1).build()
-        )), "user-1");
+        service.placeOrder(OrderRequest.builder()
+                .items(List.of(
+                        OrderLineItemRequest.builder().skuCode("SKU-1").quantity(1).build()
+                ))
+                .paymentMethod(PaymentMethod.MOCK_SUCCESS)
+                .build(), "user-1");
 
         verify(service).handleOrderPlacement(any(OrderPlacedEvent.class));
         verify(workflowPublisher, never()).publishOrderPlaced(any());
@@ -107,7 +111,8 @@ class OrderServiceWorkflowRoutingTest {
         return new OrderPlacedEvent(
                 orderNumber,
                 "user-1",
-                List.of(OrderLineItemRequest.builder().skuCode("SKU-1").quantity(1).build())
+                List.of(OrderLineItemRequest.builder().skuCode("SKU-1").quantity(1).build()),
+                PaymentMethod.MOCK_SUCCESS
         );
     }
 }

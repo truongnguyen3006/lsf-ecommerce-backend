@@ -35,7 +35,8 @@ class OrderPaymentResultEnvelopeRuntimeTest {
                     "lsf.eventing.ignore-unknown-event-type=false",
                     "lsf.eventing.idempotency.enabled=true",
                     "lsf.eventing.idempotency.store=memory",
-                    "lsf.kafka.consumer.group-id=order-updater-group"
+                    "lsf.kafka.consumer.group-id=order-updater-group",
+                    "app.order.workflow.mode=legacy"
             );
 
     @Test
@@ -68,6 +69,12 @@ class OrderPaymentResultEnvelopeRuntimeTest {
                     eq("evt-payment-processed-1")
             );
         });
+    }
+
+    @Test
+    void shouldDisableDirectPaymentResultHandlerInSagaMode() {
+        runner.withPropertyValues("app.order.workflow.mode=lsf-saga")
+                .run(context -> assertThat(context).doesNotHaveBean(OrderPaymentResultEventHandler.class));
     }
 
     @Configuration(proxyBeanMethods = false)

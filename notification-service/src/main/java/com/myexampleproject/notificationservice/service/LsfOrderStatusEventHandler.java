@@ -30,7 +30,7 @@ public class LsfOrderStatusEventHandler {
 
         NotificationMessage message = new NotificationMessage(
                 status,
-                "Cập nhật trạng thái đơn hàng: " + status
+                toVietnameseStatusMessage(status)
         );
 
         messagingTemplate.convertAndSend("/topic/order/" + orderNumber, message);
@@ -43,6 +43,18 @@ public class LsfOrderStatusEventHandler {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private String toVietnameseStatusMessage(String status) {
+        String normalized = safe(status).toUpperCase();
+        return switch (normalized) {
+            case "PENDING" -> "Đơn hàng đã được tiếp nhận. Hệ thống đang bắt đầu giữ chỗ tồn kho.";
+            case "VALIDATED" -> "Tồn kho đã được giữ chỗ. Hệ thống đang chờ kết quả thanh toán.";
+            case "COMPLETED" -> "Thanh toán đã thành công. Hệ thống đang xác nhận giữ chỗ để hoàn tất đơn hàng.";
+            case "PAYMENT_FAILED" -> "Thanh toán không thành công. Hệ thống đang hoàn lại phần giữ chỗ.";
+            case "FAILED" -> "Đơn hàng không thể tiếp tục. Nếu đã giữ chỗ, hệ thống sẽ hoàn lại tương ứng.";
+            default -> "Trạng thái đơn hàng đã được cập nhật: " + normalized;
+        };
     }
 
     public record NotificationMessage(String status, String message) {}

@@ -1,6 +1,7 @@
 package com.myexampleproject.orderservice.service;
 
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.InventoryCheckRequest;
 import com.myexampleproject.common.event.OrderPlacedEvent;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,8 @@ class KafkaOrderWorkflowPublisherTest {
         OrderPlacedEvent event = new OrderPlacedEvent(
                 "ORDER-1",
                 "user-1",
-                List.of(OrderLineItemRequest.builder().skuCode("SKU-1").quantity(2).build())
+                List.of(OrderLineItemRequest.builder().skuCode("SKU-1").quantity(2).build()),
+                PaymentMethod.MOCK_SUCCESS
         );
 
         when(kafkaTemplate.send(eq(OrderMessagingConstants.ORDER_PLACED_TOPIC), anyString(), eq(event)))

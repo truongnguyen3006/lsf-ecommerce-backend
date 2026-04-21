@@ -1,5 +1,6 @@
 package com.myexampleproject.cartservice.service;
 
+import com.myexampleproject.common.dto.PaymentMethod;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,9 +19,9 @@ public class CartCheckoutRequestDispatcher {
 
     private final CartService cartService;
 
-    public boolean dispatch(String userId) {
+    public boolean dispatch(String userId, PaymentMethod paymentMethod) {
         try {
-            cartCheckoutExecutor.execute(() -> runCheckout(userId));
+            cartCheckoutExecutor.execute(() -> runCheckout(userId, paymentMethod));
             return true;
         } catch (RejectedExecutionException exception) {
             log.warn("Checkout queue saturated for user {}", userId);
@@ -28,9 +29,9 @@ public class CartCheckoutRequestDispatcher {
         }
     }
 
-    private void runCheckout(String userId) {
+    private void runCheckout(String userId, PaymentMethod paymentMethod) {
         try {
-            cartService.checkout(userId);
+            cartService.checkout(userId, paymentMethod);
         } catch (RuntimeException exception) {
             log.warn("Async checkout rejected for user {}: {}", userId, exception.getMessage());
         } catch (Exception exception) {

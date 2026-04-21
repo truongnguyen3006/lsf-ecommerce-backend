@@ -1,12 +1,14 @@
 package com.myexampleproject.orderservice.service;
 
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 
 import java.util.List;
 
 public record OrderCheckoutSagaState(
         String orderNumber,
         List<OrderLineItemRequest> items,
+        PaymentMethod paymentMethod,
         boolean inventoryValidated,
         boolean paymentSucceeded,
         boolean compensationCompleted,
@@ -15,10 +17,15 @@ public record OrderCheckoutSagaState(
         String lastMessage
 ) {
 
-    public static OrderCheckoutSagaState initial(String orderNumber, List<OrderLineItemRequest> items) {
+    public static OrderCheckoutSagaState initial(
+            String orderNumber,
+            List<OrderLineItemRequest> items,
+            PaymentMethod paymentMethod
+    ) {
         return new OrderCheckoutSagaState(
                 orderNumber,
                 List.copyOf(items),
+                paymentMethod,
                 false,
                 false,
                 false,
@@ -32,6 +39,7 @@ public record OrderCheckoutSagaState(
         return new OrderCheckoutSagaState(
                 orderNumber,
                 items,
+                paymentMethod,
                 true,
                 paymentSucceeded,
                 compensationCompleted,
@@ -49,6 +57,7 @@ public record OrderCheckoutSagaState(
         return new OrderCheckoutSagaState(
                 orderNumber,
                 items,
+                paymentMethod,
                 inventoryValidated,
                 true,
                 compensationCompleted,
@@ -66,6 +75,7 @@ public record OrderCheckoutSagaState(
         return new OrderCheckoutSagaState(
                 orderNumber,
                 items,
+                paymentMethod,
                 inventoryValidated,
                 paymentSucceeded,
                 compensationCompleted,
@@ -79,6 +89,7 @@ public record OrderCheckoutSagaState(
         return new OrderCheckoutSagaState(
                 orderNumber,
                 items,
+                paymentMethod,
                 inventoryValidated,
                 paymentSucceeded,
                 true,

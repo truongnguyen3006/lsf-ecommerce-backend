@@ -2,6 +2,7 @@ package com.myexampleproject.paymentservice.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.OrderValidatedEvent;
 import com.myexampleproject.paymentservice.service.PaymentService;
 import com.myorg.lsf.contracts.core.envelope.EventEnvelope;
@@ -52,7 +53,8 @@ class PaymentOrderValidatedEnvelopeRuntimeTest {
 
             OrderValidatedEvent payload = new OrderValidatedEvent(
                     "ORDER-1",
-                    List.of(new OrderLineItemRequest("SKU-1", 1))
+                    List.of(new OrderLineItemRequest("SKU-1", 1)),
+                    PaymentMethod.MOCK_SUCCESS
             );
             EventEnvelope envelope = EventEnvelope.builder()
                     .eventId("evt-validated-1")
@@ -70,6 +72,7 @@ class PaymentOrderValidatedEnvelopeRuntimeTest {
                                     && "ORDER-1".equals(event.getOrderNumber())
                                     && event.getItems() != null
                                     && event.getItems().size() == 1
+                                    && event.getPaymentMethod() == PaymentMethod.MOCK_SUCCESS
                     ),
                     eq("lsf-envelope"),
                     eq("evt-validated-1")

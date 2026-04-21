@@ -40,7 +40,8 @@ public class OrderCheckoutSagaConfiguration {
                                 context.state().orderNumber(),
                                 new OrderInventoryValidationRequestedCommand(
                                         context.state().orderNumber(),
-                                        context.state().items()
+                                        context.state().items(),
+                                        context.state().paymentMethod()
                                 )
                         ))
                         .onReply(
@@ -108,7 +109,8 @@ public class OrderCheckoutSagaConfiguration {
                                 context.state().orderNumber(),
                                 new OrderValidatedEvent(
                                         context.state().orderNumber(),
-                                        context.state().items()
+                                        context.state().items(),
+                                        context.state().paymentMethod()
                                 )
                         ))
                         .onReply(

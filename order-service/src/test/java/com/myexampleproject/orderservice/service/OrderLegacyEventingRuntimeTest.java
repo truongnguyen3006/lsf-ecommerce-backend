@@ -2,6 +2,7 @@ package com.myexampleproject.orderservice.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.CartCheckoutEvent;
 import com.myexampleproject.common.event.CartLineItem;
 import com.myexampleproject.common.event.OrderPlacedEvent;
@@ -60,7 +61,8 @@ class OrderLegacyEventingRuntimeTest {
 
             CartCheckoutEvent cartCheckoutEvent = new CartCheckoutEvent(
                     "user-7",
-                    List.of(new CartLineItem("SKU-1", 2, new BigDecimal("10.00")))
+                    List.of(new CartLineItem("SKU-1", 2, new BigDecimal("10.00"))),
+                    PaymentMethod.COD
             );
             listener.onMessage(cartCheckoutEvent);
 
@@ -70,6 +72,7 @@ class OrderLegacyEventingRuntimeTest {
                                     && request.getItems().size() == 1
                                     && "SKU-1".equals(request.getItems().get(0).getSkuCode())
                                     && request.getItems().get(0).getQuantity() == 2
+                                    && request.getPaymentMethod() == PaymentMethod.COD
                     ),
                     eq("user-7")
             );
@@ -77,7 +80,8 @@ class OrderLegacyEventingRuntimeTest {
             OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent(
                     "ORDER-1",
                     "user-7",
-                    List.of(OrderLineItemRequest.builder().skuCode("SKU-9").quantity(3).build())
+                    List.of(OrderLineItemRequest.builder().skuCode("SKU-9").quantity(3).build()),
+                    PaymentMethod.MOCK_SUCCESS
             );
             listener.onMessage(orderPlacedEvent);
 
@@ -115,6 +119,7 @@ class OrderLegacyEventingRuntimeTest {
                                     && request.getItems().size() == 1
                                     && "SKU-2".equals(request.getItems().get(0).getSkuCode())
                                     && request.getItems().get(0).getQuantity() == 1
+                                    && request.getPaymentMethod() == PaymentMethod.MOCK_SUCCESS
                     ),
                     eq("user-9")
             );
@@ -122,7 +127,8 @@ class OrderLegacyEventingRuntimeTest {
             OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent(
                     "ORDER-MAP-1",
                     "user-9",
-                    List.of(OrderLineItemRequest.builder().skuCode("SKU-5").quantity(4).build())
+                    List.of(OrderLineItemRequest.builder().skuCode("SKU-5").quantity(4).build()),
+                    PaymentMethod.MOCK_SUCCESS
             );
             listener.onMessage(objectMapper.convertValue(orderPlacedEvent, Map.class));
 

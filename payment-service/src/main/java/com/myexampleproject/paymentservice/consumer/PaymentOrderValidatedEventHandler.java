@@ -14,7 +14,8 @@ public class PaymentOrderValidatedEventHandler {
     static final String ORDER_VALIDATED_EVENT_TYPE = "order.validated.v1";
 
     private final PaymentService paymentService;
-
+    //Ở phía adopter, để nhận sự kiện chỉ cần khai báo @LsfEventHandler, chỉ rõ eventType và payload.
+    // Framework lo deserialize envelope, dispatch đúng handler.
     @LsfEventHandler(
             value = ORDER_VALIDATED_EVENT_TYPE,
             payload = OrderValidatedEvent.class

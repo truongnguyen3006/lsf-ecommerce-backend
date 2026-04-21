@@ -24,11 +24,8 @@ public class OrderSagaStateService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderSagaStateService.class);
 
-    // Dùng đúng topic status mà branch hiện tại của bạn đang chạy ổn.
-    // Nếu bạn đã sửa sang envelope-topic thì giữ dòng dưới.
     private static final String ORDER_STATUS_TOPIC = "order-status-envelope-topic";
-    // Nếu project bạn đang dùng tên cũ thì đổi lại:
-    // private static final String ORDER_STATUS_TOPIC = "order-status-topic";
+
 
     private static final String ORDER_VALIDATED_TOPIC = "order-validated-envelope-topic";
     private static final String INVENTORY_RESERVATION_CONFIRM_TOPIC = "inventory-reservation-confirm-envelope-topic";
@@ -138,7 +135,11 @@ public class OrderSagaStateService {
                 .map(this::toOrderLineItemRequest)
                 .toList();
 
-        OrderValidatedEvent payload = new OrderValidatedEvent(order.getOrderNumber(), items);
+        OrderValidatedEvent payload = new OrderValidatedEvent(
+                order.getOrderNumber(),
+                items,
+                order.getPaymentMethod()
+        );
 
         EventEnvelope envelope = envelopeFactory.wrap(
                 "order.validated.v1",

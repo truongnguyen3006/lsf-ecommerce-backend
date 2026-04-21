@@ -1,12 +1,10 @@
 package com.myexampleproject.common.event;
 
 import com.myexampleproject.common.dto.OrderLineItemRequest;
-import com.myexampleproject.common.dto.OrderLineItemsDto;
-import lombok.AllArgsConstructor;
+import com.myexampleproject.common.dto.PaymentMethod;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
 import java.util.List;
 
 @Data
@@ -15,4 +13,5 @@ import java.util.List;
 public class OrderValidatedEvent {
     private String orderNumber;
     private List<OrderLineItemRequest> items;
+    private PaymentMethod paymentMethod;
 }

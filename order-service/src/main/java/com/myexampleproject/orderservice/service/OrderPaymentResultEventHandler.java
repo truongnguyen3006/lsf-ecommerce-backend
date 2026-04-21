@@ -5,9 +5,14 @@ import com.myexampleproject.common.event.PaymentProcessedEvent;
 import com.myorg.lsf.contracts.core.envelope.EventEnvelope;
 import com.myorg.lsf.eventing.LsfEventHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(
+        name = "app.order.workflow.mode",
+        havingValue = "legacy"
+)
 @RequiredArgsConstructor
 public class OrderPaymentResultEventHandler {
 

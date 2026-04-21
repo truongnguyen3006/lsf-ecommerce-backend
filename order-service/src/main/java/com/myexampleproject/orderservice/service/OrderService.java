@@ -3,6 +3,7 @@ package com.myexampleproject.orderservice.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myexampleproject.common.dto.OrderLineItemRequest;
 import com.myexampleproject.common.dto.OrderLineItemsDto;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.InventoryCheckRequest;
 import com.myexampleproject.common.event.InventoryCheckResult;
 import com.myexampleproject.common.event.OrderPlacedEvent;
@@ -56,7 +57,8 @@ public class OrderService {
         log.info("Order {} received. Persisting pending order and starting workflow...", orderNumber);
 
         List<OrderLineItemRequest> items = orderRequest.getItems();
-        OrderPlacedEvent placedEvent = new OrderPlacedEvent(orderNumber, userId, items);
+        PaymentMethod paymentMethod = resolvePaymentMethod(orderRequest.getPaymentMethod());
+        OrderPlacedEvent placedEvent = new OrderPlacedEvent(orderNumber, userId, items, paymentMethod);
         handleOrderPlacement(placedEvent);
         return orderNumber;
     }
@@ -214,13 +216,18 @@ public class OrderService {
                 "totalItems", items.size(),
                 "receivedItems", 0,
                 "failed", false,
-                "request", new OrderRequest(items)
+                "request", OrderRequest.builder()
+                        .items(items)
+                        .paymentMethod(resolvePaymentMethod(event.getPaymentMethod()))
+                        .build()
         );
         redisTemplate.opsForHash().putAll(SAGA_PREFIX + orderNumber, sagaState);
         redisTemplate.expire(SAGA_PREFIX + orderNumber, Duration.ofMinutes(10));
 
         for (OrderLineItemRequest item : items) {
-            orderWorkflowPublisher.publishInventoryCheckRequest(new InventoryCheckRequest(orderNumber, item));
+            orderWorkflowPublisher.publishInventoryCheckRequest(
+                    new InventoryCheckRequest(orderNumber, item, event.getPaymentMethod())
+            );
         }
 
         log.info("SAGA started for persisted Order {}. Check requests sent.", orderNumber);
@@ -248,6 +255,7 @@ public class OrderService {
         order.setOrderNumber(event.getOrderNumber());
         order.setUserId(event.getUserId());
         order.setStatus("PENDING");
+        order.setPaymentMethod(resolvePaymentMethod(event.getPaymentMethod()));
 
         List<OrderLineItemRequest> itemRequests = event.getOrderLineItemsDtoList();
         List<OrderLineItems> orderLineItemsEntities = new ArrayList<>();
@@ -309,6 +317,7 @@ public class OrderService {
                         .toList())
                 .totalPrice(order.getTotalPrice())
                 .orderDate(order.getOrderDate())
+                .paymentMethod(order.getPaymentMethod())
                 .build();
     }
 
@@ -344,5 +353,9 @@ public class OrderService {
                 event
         );
         outboxWriter.append(envelope, "order-status-envelope-topic", orderNumber);
+    }
+
+    private PaymentMethod resolvePaymentMethod(PaymentMethod paymentMethod) {
+        return paymentMethod == null ? PaymentMethod.defaultMethod() : paymentMethod;
     }
 }

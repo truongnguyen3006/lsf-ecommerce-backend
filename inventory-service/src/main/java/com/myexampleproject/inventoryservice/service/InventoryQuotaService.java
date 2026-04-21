@@ -1,6 +1,7 @@
 package com.myexampleproject.inventoryservice.service;
 
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.InventoryCheckResult;
 import com.myorg.lsf.quota.api.QuotaDecision;
 import com.myorg.lsf.quota.api.QuotaRequest;
@@ -25,24 +26,42 @@ public class InventoryQuotaService {
     private static final String RESOURCE_TYPE = "flashsale_sku";
 
     private final QuotaService quotaService;
+    private final InventoryOrderReservationService reservationService;
 
     @Value("${lsf.quota.default-hold-seconds:120}")
     private int defaultHoldSeconds;
 
+    @Value("${app.inventory.cod-reservation-hold-seconds:600}")
+    private int codHoldSeconds;
+
     // Reserve quota instead of deducting physical stock immediately.
     // physicalStock is used as the current quota limit for this SKU.
-    public InventoryCheckResult reserve(String orderNumber, OrderLineItemRequest item, int physicalStock) {
+    public InventoryCheckResult reserve(
+            String orderNumber,
+            OrderLineItemRequest item,
+            int physicalStock,
+            PaymentMethod paymentMethod
+    ) {
         String skuCode = item.getSkuCode();
         String quotaKey = quotaKey(skuCode);
         String requestId = requestId(orderNumber, skuCode);
+        int holdSeconds = resolveHoldSeconds(paymentMethod);
 
         QuotaResult result = quotaService.reserve(QuotaRequest.builder()
                 .quotaKey(quotaKey)
                 .requestId(requestId)
                 .amount(item.getQuantity())
                 .limit(Math.max(0, physicalStock))
-                .hold(Duration.ofSeconds(defaultHoldSeconds))
+                .hold(Duration.ofSeconds(holdSeconds))
                 .build());
+        reservationService.markReserved(
+                orderNumber,
+                skuCode,
+                item.getQuantity(),
+                quotaKey,
+                requestId,
+                result
+        );
 
         boolean success = result.decision() == QuotaDecision.ACCEPTED || result.decision() == QuotaDecision.DUPLICATE;
         String reason = success
@@ -82,10 +101,15 @@ public class InventoryQuotaService {
         return new InventoryCheckResult(orderNumber, item, success, reason);
     }
 
+    private int resolveHoldSeconds(PaymentMethod paymentMethod) {
+        return paymentMethod == PaymentMethod.COD ? codHoldSeconds : defaultHoldSeconds;
+    }
+
     public QuotaResult confirm(String workflowId, String resourceId) {
         String quotaKey = quotaKey(resourceId);
         String requestId = requestId(workflowId, resourceId);
         QuotaResult result = quotaService.confirm(quotaKey, requestId);
+        reservationService.markConfirmed(workflowId, resourceId, result);
         if (result.decision() == QuotaDecision.NOT_FOUND) {
             log.warn(
                     "QUOTA CONFIRM -> workflowId={}, resourceId={}, quotaKey={}, requestId={}, decision={}, used={}, state={}",
@@ -104,6 +128,7 @@ public class InventoryQuotaService {
         String quotaKey = quotaKey(resourceId);
         String requestId = requestId(workflowId, resourceId);
         QuotaResult result = quotaService.release(quotaKey, requestId);
+        reservationService.markReleased(workflowId, resourceId, reason, result);
         if (result.decision() == QuotaDecision.NOT_FOUND) {
             log.warn(
                     "QUOTA RELEASE -> workflowId={}, resourceId={}, quotaKey={}, requestId={}, decision={}, used={}, reason={}",

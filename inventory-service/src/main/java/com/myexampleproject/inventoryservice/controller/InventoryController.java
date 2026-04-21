@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myexampleproject.common.event.InventoryAdjustmentEvent;
 import com.myexampleproject.inventoryservice.dto.InventoryAvailabilityResponse;
+import com.myexampleproject.inventoryservice.dto.OrderReservationSummaryResponse;
 import com.myexampleproject.inventoryservice.service.InventoryAdjustmentPublisher;
 import com.myexampleproject.inventoryservice.service.InventoryAdjustmentGuardService;
 import com.myexampleproject.inventoryservice.service.InventoryAvailabilityService;
+import com.myexampleproject.inventoryservice.service.InventoryOrderReservationService;
 import com.myexampleproject.inventoryservice.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class InventoryController {
     private final InventoryService inventoryService;
     private final InventoryAvailabilityService inventoryAvailabilityService;
     private final InventoryAdjustmentGuardService inventoryAdjustmentGuardService;
+    private final InventoryOrderReservationService inventoryOrderReservationService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostMapping("/adjust")
@@ -81,6 +84,13 @@ public class InventoryController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(503).body(Map.of("error", "State store not ready"));
         }
+    }
+
+    @GetMapping("/reservations/order/{orderNumber}")
+    public ResponseEntity<OrderReservationSummaryResponse> getOrderReservation(
+            @PathVariable String orderNumber
+    ) {
+        return ResponseEntity.ok(inventoryOrderReservationService.getOrderReservationSummary(orderNumber));
     }
 
     @GetMapping("/{sku}")

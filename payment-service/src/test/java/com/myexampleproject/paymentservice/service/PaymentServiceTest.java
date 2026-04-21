@@ -1,6 +1,7 @@
 package com.myexampleproject.paymentservice.service;
 
 import com.myexampleproject.common.dto.OrderLineItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.OrderValidatedEvent;
 import com.myexampleproject.common.event.PaymentFailedEvent;
 import com.myexampleproject.common.event.PaymentProcessedEvent;
@@ -30,7 +31,8 @@ class PaymentServiceTest {
         PaymentService service = new PaymentService(lsfPublisher, meterRegistry);
         OrderValidatedEvent event = new OrderValidatedEvent(
                 "ORDER-1",
-                List.of(new OrderLineItemRequest("SKU-1", 1))
+                List.of(new OrderLineItemRequest("SKU-1", 1)),
+                PaymentMethod.MOCK_SUCCESS
         );
 
         service.processValidatedOrder(event, "lsf-envelope", "evt-1");
@@ -68,10 +70,8 @@ class PaymentServiceTest {
         PaymentService service = new PaymentService(lsfPublisher, meterRegistry);
         OrderValidatedEvent event = new OrderValidatedEvent(
                 "ORDER-2",
-                List.of(
-                        new OrderLineItemRequest("SKU-1", 1),
-                        new OrderLineItemRequest("SKU-2", 1)
-                )
+                List.of(new OrderLineItemRequest("SKU-1", 5)),
+                PaymentMethod.MOCK_FAIL
         );
 
         service.processValidatedOrder(event, "lsf-envelope", null);
@@ -84,7 +84,7 @@ class PaymentServiceTest {
                 argThat(payload ->
                         payload instanceof PaymentFailedEvent failedEvent
                                 && "ORDER-2".equals(failedEvent.getOrderNumber())
-                                && "Payment gateway declined.".equals(failedEvent.getReason())
+                                && "Mock payment failed by selected scenario.".equals(failedEvent.getReason())
                 ),
                 argThat(options ->
                         options != null
@@ -100,5 +100,64 @@ class PaymentServiceTest {
                 .tag("result", "failed")
                 .counter()
                 .count()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldPublishCodPaymentProcessedImmediately() {
+        SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
+        PaymentService service = new PaymentService(lsfPublisher, meterRegistry);
+        OrderValidatedEvent event = new OrderValidatedEvent(
+                "ORDER-COD",
+                List.of(new OrderLineItemRequest("SKU-2", 1)),
+                PaymentMethod.COD
+        );
+
+        service.processValidatedOrder(event, "lsf-envelope", "evt-cod");
+
+        verify(lsfPublisher).publish(
+                eq(PaymentService.PAYMENT_PROCESSED_ENVELOPE_TOPIC),
+                eq("ORDER-COD"),
+                eq(PaymentService.PAYMENT_PROCESSED_EVENT_TYPE),
+                eq("ORDER-COD"),
+                argThat(payload ->
+                        payload instanceof PaymentProcessedEvent processedEvent
+                                && "ORDER-COD".equals(processedEvent.getOrderNumber())
+                                && processedEvent.getPaymentId() != null
+                                && processedEvent.getPaymentId().startsWith("COD-")
+                ),
+                argThat(options ->
+                        options != null
+                                && "ORDER-COD".equals(options.getCorrelationId())
+                                && "evt-cod".equals(options.getCausationId())
+                )
+        );
+        assertThat(meterRegistry.get("payment_result_publish_total")
+                .tag("path", "envelope")
+                .tag("result", "processed")
+                .counter()
+                .count()).isEqualTo(1.0);
+    }
+
+    @Test
+    void shouldNotPublishImmediatePaymentResultForTimeoutScenario() {
+        SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
+        PaymentService service = new PaymentService(lsfPublisher, meterRegistry);
+        OrderValidatedEvent event = new OrderValidatedEvent(
+                "ORDER-3",
+                List.of(new OrderLineItemRequest("SKU-1", 1)),
+                PaymentMethod.MOCK_TIMEOUT
+        );
+
+        service.processValidatedOrder(event, "lsf-envelope", "evt-3");
+
+        verify(lsfPublisher, org.mockito.Mockito.never()).publish(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any()
+        );
+        assertThat(meterRegistry.find("payment_result_publish_total").counter()).isNull();
     }
 }

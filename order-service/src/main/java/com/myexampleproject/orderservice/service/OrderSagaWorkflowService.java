@@ -21,7 +21,8 @@ public class OrderSagaWorkflowService {
         String orderNumber = event.getOrderNumber();
         OrderCheckoutSagaState initialState = OrderCheckoutSagaState.initial(
                 orderNumber,
-                event.getOrderLineItemsDtoList()
+                event.getOrderLineItemsDtoList(),
+                event.getPaymentMethod()
         );
 
         SagaStartOptions.SagaStartOptionsBuilder builder = SagaStartOptions.builder()

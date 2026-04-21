@@ -5,6 +5,7 @@ import com.myexampleproject.cartservice.model.CartEntity;
 import com.myexampleproject.cartservice.model.CartItemEntity;
 import com.myexampleproject.cartservice.repository.CartRepository;
 import com.myexampleproject.common.dto.CartItemRequest;
+import com.myexampleproject.common.dto.PaymentMethod;
 import com.myexampleproject.common.event.CartCheckoutEvent;
 import com.myexampleproject.common.event.CartLineItem;
 import com.myexampleproject.common.event.ProductCacheEvent;
@@ -116,7 +117,11 @@ public class CartService {
     }
 
     public void checkout(String userId) {
-        cartCheckoutEventPublisher.publish(buildCheckoutEvent(userId));
+        checkout(userId, PaymentMethod.defaultMethod());
+    }
+
+    public void checkout(String userId, PaymentMethod paymentMethod) {
+        cartCheckoutEventPublisher.publish(buildCheckoutEvent(userId, paymentMethod));
     }
 
     @Transactional
@@ -145,7 +150,7 @@ public class CartService {
         }
     }
 
-    private CartCheckoutEvent buildCheckoutEvent(String userId) {
+    private CartCheckoutEvent buildCheckoutEvent(String userId, PaymentMethod paymentMethod) {
         CartEntity cart = viewCart(userId);
         if (cart == null || cart.getItems().isEmpty()) {
             throw new IllegalStateException("Cart empty");
@@ -155,6 +160,10 @@ public class CartService {
                 .map(item -> new CartLineItem(item.getSkuCode(), item.getQuantity(), item.getPrice()))
                 .toList();
 
-        return new CartCheckoutEvent(userId, items);
+        return new CartCheckoutEvent(
+                userId,
+                items,
+                paymentMethod == null ? PaymentMethod.defaultMethod() : paymentMethod
+        );
     }
 }
