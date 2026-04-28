@@ -1,6 +1,6 @@
 # JMeter Testing Guide
 
-Tài liệu này hướng dẫn chạy và đọc kết quả kiểm thử tải cho backend consumer dùng LSF. README chính chỉ giữ phần tóm tắt; các bước chi tiết, token, ảnh benchmark và cách diễn giải kết quả được đặt tại đây để README gọn hơn nhưng vẫn đủ evidence cho bảo vệ luận văn.
+Tài liệu này hướng dẫn chạy và đọc kết quả kiểm thử tải cho backend consumer dùng LSF. README chính chỉ giữ phần tóm tắt; các bước chi tiết, token, ảnh benchmark và cách diễn giải kết quả được đặt tại đây để README gọn hơn nhưng vẫn đủ bằng chứng cho bảo vệ luận văn.
 
 ## Kịch bản kiểm thử
 
@@ -119,7 +119,7 @@ Summary Report cho thấy số lượng request, latency trung bình, throughput
 
 ![Grafana quota result](../screenshots/grafana_quota.png)
 
-Dashboard quota là evidence quan trọng nhất của kịch bản oversell:
+Dashboard quota là bằng chứng quan trọng nhất của kịch bản oversell:
 
 - `Quota Reserve Accepted`: số lượt giữ tài nguyên thành công.
 - `Quota Reserve Rejected`: số lượt bị từ chối do vượt khả năng cấp phát.
@@ -165,7 +165,7 @@ Summary Report multi-SKU cho thấy throughput và latency của flow checkout k
 
 ## Lưu ý khi benchmark
 
-- Không dùng credential demo cho môi trường public.
+- Không dùng tài khoản demo cho môi trường public.
 - Không kết luận chỉ từ JMeter Summary Report; cần đọc cùng Grafana quota/outbox, service health và dữ liệu tồn kho sau test.
 - `Outbox Pending` tăng trong lúc tải cao không nhất thiết là lỗi nếu publisher vẫn tiếp tục gửi event thành công.
 - Một phần checkout bị từ chối trong kịch bản oversell là kết quả hợp lệ khi quota đã hết.
