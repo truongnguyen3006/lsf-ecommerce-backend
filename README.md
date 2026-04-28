@@ -4,6 +4,8 @@
 
 Repository này là **consumer project** của LSF. Mục tiêu chính không phải xây một nền tảng ecommerce sẵn sàng cho môi trường production, mà là chứng minh các module framework như Kafka/eventing, outbox, quota/reservation, saga, observability và bằng chứng quản trị có thể được tích hợp vào một hệ thống nhiều service.
 
+Repository framework tham chiếu: [lsf-framework](https://github.com/truongnguyen3006/lsf-framework.git). Frontend demo tương ứng: [lsf-ecommerce-frontend](https://github.com/truongnguyen3006/lsf-ecommerce-frontend.git).
+
 ## Đọc nhanh
 
 | Mục tiêu đọc | Nên đọc |
@@ -173,14 +175,15 @@ ecommerce-backend/
 - Maven 3.9+
 - Docker Desktop
 - Framework LSF đã được install vào local Maven repository
-- Frontend tùy chọn ở `<workspace>/ecommerce-frontend`
+- Frontend tùy chọn: [lsf-ecommerce-frontend](https://github.com/truongnguyen3006/lsf-ecommerce-frontend.git)
 
 ## Cài đặt và chạy local
 
 ### 1. Build framework LSF trước
 
 ```bash
-cd <workspace>/lsf-parent
+git clone https://github.com/truongnguyen3006/lsf-framework.git
+cd lsf-framework
 mvn clean install
 ```
 
@@ -189,7 +192,8 @@ Backend đang import `com.myorg.lsf:lsf-parent:1.0-SNAPSHOT`, nên bước này 
 ### 2. Khởi động hạ tầng
 
 ```bash
-cd <workspace>/ecommerce-backend
+git clone https://github.com/truongnguyen3006/lsf-ecommerce-backend.git
+cd lsf-ecommerce-backend
 docker compose up -d
 ```
 
@@ -346,18 +350,19 @@ File dữ liệu đi kèm gồm `Jmeter Script/data_oversell.csv` và `Jmeter Sc
 
 Nên đọc nếu muốn hiểu rõ phần tích hợp LSF:
 
-- [docs/LSF_INTEGRATION_TRACEABILITY.md](docs/LSF_INTEGRATION_TRACEABILITY.md)
-- [docs/LSF_INTEGRATION_BEFORE_AFTER.md](docs/LSF_INTEGRATION_BEFORE_AFTER.md)
-- [docs/LSF_PHASE3_OPERATIONS_VISIBILITY.md](docs/LSF_PHASE3_OPERATIONS_VISIBILITY.md)
-- [docs/LSF_PHASE8_DEFAULT_ON_SAGA_CUTOVER.md](docs/LSF_PHASE8_DEFAULT_ON_SAGA_CUTOVER.md)
+- [docs/LSF_ADOPTION_TRACEABILITY.md](docs/LSF_ADOPTION_TRACEABILITY.md)
+- [docs/LSF_ADOPTION_CURRENT_STATE.md](docs/LSF_ADOPTION_CURRENT_STATE.md)
+- [docs/LSF_OPERATIONS_VISIBILITY.md](docs/LSF_OPERATIONS_VISIBILITY.md)
+- [docs/LSF_SAGA_DEFAULT_WORKFLOW.md](docs/LSF_SAGA_DEFAULT_WORKFLOW.md)
+- [docs/JAVA21_LSF_COMPATIBILITY.md](docs/JAVA21_LSF_COMPATIBILITY.md)
 
-Các file phase/checkpoint khác trong `docs/` chủ yếu là nhật ký kỹ thuật chi tiết. Người mới không cần đọc ngay khi chỉ muốn cài đặt, chạy demo hoặc hiểu kiến trúc chính.
+Các file phase/checkpoint cũ đã được chuyển vào `docs/history/` để giữ lịch sử kỹ thuật. Người mới không cần đọc ngay khi chỉ muốn cài đặt, chạy demo hoặc hiểu kiến trúc chính.
 
 ## Lỗi phổ biến khi chạy và cách sửa
 
 | Lỗi | Nguyên nhân thường gặp | Cách sửa |
 |---|---|---|
-| Maven báo không tìm thấy `com.myorg.lsf:*:1.0-SNAPSHOT` | Chưa build/install framework LSF ở local | Chạy `cd <workspace>/lsf-parent` rồi `mvn clean install` |
+| Maven báo không tìm thấy `com.myorg.lsf:*:1.0-SNAPSHOT` | Chưa build/install framework LSF ở local | Chạy `cd lsf-framework` rồi `mvn clean install` |
 | Service fail vì sai Java version | `JAVA_HOME` đang trỏ tới JDK khác 21 | Kiểm tra `mvn -version`, đổi `JAVA_HOME` sang JDK 21 |
 | `docker compose up -d` fail do port conflict | Port `3306`, `6379`, `9092`, `8081`, `8085`, `9090`, `3000`, `9411`, `8888` đang bị chiếm | Dừng container/process cũ hoặc đổi port trong `docker-compose.yml` |
 | Không thấy dữ liệu sản phẩm seed | MySQL volume cũ đã tồn tại nên `mysql-init/init.sql` không chạy lại | Xóa volume `business-db-data-v2` nếu muốn seed lại từ đầu, rồi chạy lại compose |

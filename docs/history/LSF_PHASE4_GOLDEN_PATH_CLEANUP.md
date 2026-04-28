@@ -1,8 +1,8 @@
-# LSF Phase 4 Golden Path Cleanup
+﻿# LSF Phase 4 Golden Path Cleanup
 
 ## Framework findings
 
-- Source of truth was checked directly in `D:\IdeaProjects\lsf-parent-fixed`.
+- Source of truth was checked directly in `https://github.com/truongnguyen3006/lsf-framework.git`.
 - `lsf-eventing-starter` exposes public consumer-side extension points through `PayloadConverter`, `LsfEnvelopeListener`, `LsfDispatcher`, and `@LsfEventHandler`.
 - `lsf-outbox-mysql-starter` exposes `OutboxWriter` for appending envelopes, but it does not expose a public SPI to publish raw payloads from the MySQL outbox publisher path.
 - Because of that gap, `product-service` still needs a temporary raw-payload bridge to preserve existing Kafka contracts on:
