@@ -68,7 +68,7 @@
             </elementProp>
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
-              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFU0VPVzB4VlpSaWpNVXRXYUNBWmxCckRCeEtWT2R5QkkwQlBRNkRpOGJRIn0.eyJleHAiOjE3NzcwNzkxMTQsImlhdCI6MTc3NjY0NzExMywianRpIjoiZDZiM2E1OWMtNjM4YS00OGQ1LWIyNGYtNDdkZjdiNjgyOTM2IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg1L3JlYWxtcy9zcHJpbmctYm9vdC1taWNyb3NlcnZpY2VzLXJlYWxtIiwic3ViIjoiNzdjMWE1YjktZWM2Yy00ZjhlLWIwOGMtZjBmZDI0Y2ZhMGFiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXNwcmluZy1ib290LW1pY3Jvc2VydmljZXMtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sInNwcmluZy1jbG91ZC1jbGllbnQiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicm9sZXMiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsImNsaWVudElkIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsImNsaWVudEFkZHJlc3MiOiIxNzIuMTkuMC4xIn0.2HHlpsFxQ-WnQ45g3kNM-ok-xavUqLnBnEl4Vo8K9VHGYCXUaIKelbUqokkPqemTyE_Hj0SeuWg6BnqwuNyYBii3XckLf5FtmyrfTQis0XdIsaHNMZYXXFEU9JuIdeOrUX6FzW1QzpxynUzhIbQ4i_5NkLfyGCOboEs_29kjGbcd4ApY1E7V54XKzph533KHddWmBVHeA3bkmrBgksIq1hl10gtKR_vkq2iB3A68_82PvkOYWzK5Fuwpoej0lAb7p2zYEUHXiwzfDh2I2G7za1x3UNqfmpZF4wlxhWygu615x8-RYzIBKtGoPEhQnjUOKNeMtNtxHNKGf9bIQfMeTQ</stringProp>
+              <stringProp name="Header.value">Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJFU0VPVzB4VlpSaWpNVXRXYUNBWmxCckRCeEtWT2R5QkkwQlBRNkRpOGJRIn0.eyJleHAiOjE3NzcyNDMzMzgsImlhdCI6MTc3NjgxMTMzOCwianRpIjoiNTdiNGExZTktMDg2YS00NWMwLWI4ODctYjBiYzBhZGNkYTllIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDg1L3JlYWxtcy9zcHJpbmctYm9vdC1taWNyb3NlcnZpY2VzLXJlYWxtIiwic3ViIjoiNzdjMWE1YjktZWM2Yy00ZjhlLWIwOGMtZjBmZDI0Y2ZhMGFiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImFkbWluIiwidW1hX2F1dGhvcml6YXRpb24iLCJkZWZhdWx0LXJvbGVzLXNwcmluZy1ib290LW1pY3Jvc2VydmljZXMtcmVhbG0iXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sInNwcmluZy1jbG91ZC1jbGllbnQiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicm9sZXMiLCJjbGllbnRIb3N0IjoiMTcyLjE5LjAuMSIsImNsaWVudElkIjoic3ByaW5nLWNsb3VkLWNsaWVudCIsImNsaWVudEFkZHJlc3MiOiIxNzIuMTkuMC4xIn0.RKToOHovn86u486IwZDrIBe1HwOEvHZ2gyRBdL2FP5ijBpyo8_x7lXXSk0S879rKo9uQTi7foMRI7mDTPdqPwfKhAgQctRSHLYYkjTWUZW0br9X8gIPpKqvrchJqd-SuWVQwcDGISlqQfGHsCgkUKvLXWDEJWV1AZh4mSSkdeywtQffnY_RKPUHn86arXz2fiQ-L8O93LlKz4MjWYM23dNWjSaxp6EPi6IropdEfvDzW1cr9ixshR7Q0THzx-N09mVBTMvP5JFVPQgwMHb2cSHN4Yw5csaXLBVCZq3dxSp0V5NC6havW5MX5qjezhDrSunKuaa136M2c49XWC87MIg</stringProp>
             </elementProp>
           </collectionProp>
         </HeaderManager>
@@ -95,7 +95,7 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Synchronizing Timer">
+        <SyncTimer guiclass="TestBeanGUI" testclass="SyncTimer" testname="Synchronizing Timer" enabled="true">
           <intProp name="groupSize">1000</intProp>
           <longProp name="timeoutInMs">0</longProp>
         </SyncTimer>
@@ -121,7 +121,7 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
